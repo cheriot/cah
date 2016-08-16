@@ -5,13 +5,29 @@ const chai = require('chai'),
 
 chai.use(chaiHttp);
 
+function expect200(res) {
+  expect(res).to.have.status(200);
+  return res;
+}
+
+function expectJson(obj) {
+  return function(res) {
+    expect(res.body).to.deep.equal(obj);
+    return res;
+  }
+}
+
+function error(err) {
+  console.log('Error is', err);
+  throw err;
+}
+
 describe('/api/v1', () => {
-  it('/ is reachable', (done) => {
-    chai.request(app)
+  it('/ is reachable', () => {
+    return chai.request(app)
       .get('/api/v1/')
-      .end((err, res) => {
-        expect(res).to.have.status(200);
-        done();
-      });
+      .then(expect200)
+      .then(expectJson({message: "hooray! welcome to api v1!"}))
+      .catch(error);
   });
 });
