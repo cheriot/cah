@@ -4,7 +4,7 @@
   "description": "REST API for a cards against humanity knock off. Runs on Google's App Engine Flexible Environment.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha test/v1_test.js",
     "start": "node --trace-sync-io app.js",
     "monitor": "nodemon app.js",
     "deploy": "gcloud app deploy"
@@ -17,5 +17,10 @@
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-http": "^3.0.0",
+    "mocha": "^3.0.2"
   }
 }
