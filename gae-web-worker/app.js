@@ -1,12 +1,17 @@
 'use strict';
 
-const express = require('express');
-const bodyParser = require('body-parser');
+const express = require('express'),
+  bodyParser = require('body-parser'),
+  nocache = require('nocache');
 
 // Configure the server.
 const app = express();
-app.use(bodyParser.urlencoded({ extended: true })); // Fancy query string params with qs!
+// Fancy query string params with qs!
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+// Apps will access data through firebase. If that changes, reexamine.
+app.use(nocache());
+
 // TODO: Go through this agian:
 // https://expressjs.com/en/advanced/best-practice-security.html
 // TODO: use helmet
