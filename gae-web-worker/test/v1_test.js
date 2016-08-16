@@ -22,8 +22,8 @@ function error(err) {
   throw err;
 }
 
-describe('/api/v1', () => {
-  it('/ is reachable', () => {
+describe('/api/v1', function() {
+  it('/ is reachable', function() {
     return chai.request(app)
       .get('/api/v1/')
       .then(expect200)
