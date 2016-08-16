@@ -12,6 +12,8 @@ function expect200(res) {
 
 function expectJson(obj) {
   return function(res) {
+    expect(res.charset).to.equal('utf-8');
+    expect(res.type).to.equal('application/json');
     expect(res.body).to.deep.equal(obj);
     return res;
   }
