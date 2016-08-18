@@ -1,9 +1,26 @@
 const chai = require('chai'),
   expect = chai.expect,
   chaiHttp = require('chai-http'),
-  app = require('../app');
+  app = require('../app'),
+  FirebaseServer = require('firebase-server');
 
 chai.use(chaiHttp);
+
+/*
+ * Firebase/data helpers
+ */
+
+let firebaseServer;
+function startFirebase(initialData) {
+  firebaseServer = new FirebaseServer(5000, 'localhost.firebaseio.com', initialData);
+}
+
+function closeFirebase() {
+  return (res) => {
+    firebaseServer.close();
+    return res;
+  }
+}
 
 /*
  * Expect helpers.
@@ -40,13 +57,28 @@ function error(err) {
  * Tests
  */
 
-describe('/api/v1', function() {
-  it('/ is reachable', function() {
-    return chai.request(app)
-      .get('/api/v1/')
-      .then(expect200)
-      .then(expectNoCache)
-      .then(expectJson({message: "hooray! welcome to api v1!"}))
-      .catch(error);
+describe('http resources', function() {
+  // TODO extract admin tests into another file.
+  describe('/admin/init', function() {
+    it('initializes the database if empty.', function() {
+      startFirebase({foo: 'bar'});
+      return chai.request(app)
+        .post('/admin/init')
+        .then(expect200)
+        .then(expectJson({message: 'Database initialized.', data: 'bar'}))
+        .then(closeFirebase())
+        .catch(error);
+    });
+  });
+
+  describe('/api/v1', function() {
+    it('/ is reachable', function() {
+      return chai.request(app)
+        .get('/api/v1/')
+        .then(expect200)
+        .then(expectNoCache)
+        .then(expectJson({message: "hooray! welcome to api v1!"}))
+        .catch(error);
+    });
   });
 });

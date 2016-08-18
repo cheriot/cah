@@ -29,6 +29,7 @@ app.get('/', function (req, res) {
 
 // Mount api versions.
 app.use('/api/v1', require('./api/v1'));
+app.use('/admin', require('./api/admin'));
 
 // Start the server
 var server = app.listen(process.env.PORT || '8080', function () {
