@@ -6,12 +6,12 @@ firebase.initializeApp({
   databaseURL: 'ws://localhost.firebaseio.com:5000'
 });
 
-const db = firebase.database();
-
 // Real setup
 // firebase.initializeApp({
 //   serviceAccount: "path/to/serviceAccountCredentials.json",
 //   databaseURL: "https://databaseName.firebaseio.com"
 // });
+
+const db = firebase.database();
 
 module.exports = db;

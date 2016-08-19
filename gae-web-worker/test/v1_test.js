@@ -10,16 +10,13 @@ chai.use(chaiHttp);
  * Firebase/data helpers
  */
 
-let firebaseServer;
+var firebaseServer;
 function startFirebase(initialData) {
-  firebaseServer = new FirebaseServer(5000, 'localhost.firebaseio.com', initialData);
+  firebaseServer = new FirebaseServer(5000, 'localhost.firebaseio.com', initialData || {});
 }
 
 function closeFirebase() {
-  return (res) => {
-    firebaseServer.close();
-    return res;
-  }
+  firebaseServer.close();
 }
 
 /*
@@ -58,16 +55,17 @@ function error(err) {
  */
 
 describe('http resources', function() {
+
   // TODO extract admin tests into another file.
   describe('/admin/init', function() {
+    beforeEach(() => startFirebase({foo: 'bar'}));
+    afterEach(closeFirebase);
+
     it('initializes the database if empty.', function() {
-      startFirebase({foo: 'bar'});
       return chai.request(app)
         .post('/admin/init')
         .then(expect200)
-        .then(expectJson({message: 'Database initialized.', data: 'bar'}))
-        .then(closeFirebase())
-        .catch(error);
+        .then(expectJson({message: 'Database initialized.', data: 'bar'}));
     });
   });
 
@@ -78,7 +76,22 @@ describe('http resources', function() {
         .then(expect200)
         .then(expectNoCache)
         .then(expectJson({message: "hooray! welcome to api v1!"}))
-        .catch(error);
+    });
+
+    it('/message', function() {
+      startFirebase({message: 'original message'});
+      const m = "New Message Value";
+      return chai.request(app)
+        .post('/api/v1/message')
+        .send({message: m})
+        .then(expect200)
+        .then(expectNoCache)
+        //.then(expectJson({message: m})) // See error in models/message.js
+        .then(() => chai.request(app).get('/api/v1/message') )
+        .then(expect200)
+        .then(expectNoCache)
+        .then(expectJson({message: m}))
+        .then(closeFirebase);
     });
   });
 });

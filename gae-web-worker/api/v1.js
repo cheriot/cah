@@ -1,10 +1,20 @@
 'use strict';
 
-const router = require('express').Router();
+const router = require('express').Router(),
+  message = require('../models/message');
 
 router.get('/', function(req, res) {
   res.json({ message: 'hooray! welcome to api v1!' });
 });
+
+router.route('/message')
+  .get(function(req, res) {
+    message.get().then((val) => res.json({message: val}));
+  })
+  .post(function(req, res) {
+    message.set(req.body.message);
+    res.json({success: true});
+  });
 
 // POST /games
 // creates a new game
@@ -30,5 +40,10 @@ router.get('/', function(req, res) {
 // - update score board
 // - assign a new judge
 // - creates a new round
+
+console.error('Registered routes');
+const routes = router.stack.forEach((r) => {
+  console.error(r.route.methods, r.route.path);
+});
 
 module.exports = router;
