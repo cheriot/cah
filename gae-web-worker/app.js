@@ -2,7 +2,8 @@
 
 const express = require('express'),
   bodyParser = require('body-parser'),
-  nocache = require('nocache');
+  nocache = require('nocache'),
+  responseTime = require('response-time');
 
 // Configure the server.
 const app = express();
@@ -11,6 +12,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 // Apps will access data through firebase. If that changes, reexamine.
 app.use(nocache());
+// X-Response-Time header
+app.use(responseTime());
 
 // TODO: Go through this agian:
 // https://expressjs.com/en/advanced/best-practice-security.html
