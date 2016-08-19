@@ -1,23 +1,9 @@
 const chai = require('chai'),
   expect = chai.expect,
   chaiHttp = require('chai-http'),
-  app = require('../app'),
-  FirebaseServer = require('firebase-server');
+  firebaseMock = require('./firebase_mock');
 
 chai.use(chaiHttp);
-
-/*
- * Firebase/data helpers
- */
-
-var firebaseServer;
-function startFirebase(initialData) {
-  firebaseServer = new FirebaseServer(5000, 'localhost.firebaseio.com', initialData || {});
-}
-
-function closeFirebase() {
-  firebaseServer.close();
-}
 
 /*
  * Expect helpers.
@@ -56,10 +42,16 @@ function error(err) {
 
 describe('http resources', function() {
 
+  var app;
+  before(() => {
+    require('../models/firebase').setDatabase(firebaseMock.initClient());
+    app = require('../app');
+  })
+
   // TODO extract admin tests into another file.
   describe('/admin/init', function() {
-    beforeEach(() => startFirebase({foo: 'bar'}));
-    afterEach(closeFirebase);
+    beforeEach(() => firebaseMock.startServer({foo: 'bar'}));
+    afterEach(firebaseMock.stopServer);
 
     it('initializes the database if empty.', function() {
       return chai.request(app)
@@ -79,7 +71,7 @@ describe('http resources', function() {
     });
 
     it('/message', function() {
-      startFirebase({message: 'original message'});
+      firebaseMock.startServer({message: 'original message'});
       const m = "New Message Value";
       return chai.request(app)
         .post('/api/v1/message')
@@ -91,7 +83,7 @@ describe('http resources', function() {
         .then(expect200)
         .then(expectNoCache)
         .then(expectJson({message: m}))
-        .then(closeFirebase);
+        .then(firebaseMock.stopServer);
     });
   });
 });
