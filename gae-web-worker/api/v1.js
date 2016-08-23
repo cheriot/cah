@@ -1,7 +1,8 @@
 'use strict';
 
 const router = require('express').Router(),
-  message = require('../models/message');
+  message = require('../models/message'),
+  gameRepository = require('../models/games');
 
 router.get('/', function(req, res) {
   res.json({ message: 'hooray! welcome to api v1!' });
@@ -16,10 +17,13 @@ router.route('/message')
     res.json({success: true});
   });
 
-// POST /games
-// creates a new game
-// - initialize game state
-// - calculate join code
+router.route('/games')
+  .post(function(req, res) {
+    const userId = req.body.userId;
+    gameRepository
+      .create(req.body.userId)
+      .then((gameKey) => res.json({gameKey: gameKey}) );
+  });
 
 // POST /games/:game_id/players
 // join a game

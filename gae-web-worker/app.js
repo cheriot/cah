@@ -1,5 +1,10 @@
 'use strict';
 
+// Always, always, always error loudly by default.
+process.on('unhandledRejection', function(error, promise) {
+  console.error("UNHANDLED REJECTION", error.stack);
+});
+
 const express = require('express'),
   bodyParser = require('body-parser'),
   nocache = require('nocache'),

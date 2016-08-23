@@ -1,6 +1,8 @@
-const firebase = require("firebase");
+const firebase = require('firebase');
 
-var database;
+// firebase.database.enableLogging(true);
+
+var database, refPrefix = '';
 function initClient() {
   if(process.env.NODE_ENV != 'production')
     throw new Error('Attempting to connect to production.');
@@ -15,14 +17,16 @@ function initClient() {
 
 function ref(path) {
   if(!database) initClient();
-  return database.ref(path);
+  return database.ref(refPrefix + path);
 }
 
-function setDatabase(mock) {
+function setDatabase(mock, prefix) {
+  refPrefix = prefix;
   database = mock;
 }
 
 module.exports = {
   ref: ref,
+  timestamp: firebase.database.ServerValue.TIMESTAMP,
   setDatabase: setDatabase
 }

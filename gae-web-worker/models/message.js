@@ -7,10 +7,7 @@ function getMessage() {
 }
 
 function setMessage(str) {
-  return db.ref('message').set(str).then(() => {
-    console.error('Why is this never called?');
-    return getMessage()
-  });
+  return db.ref('message').set(str).then(getMessage);
 }
 
 module.exports = {

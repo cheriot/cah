@@ -26,7 +26,7 @@ function expectJson(obj) {
   return function(res) {
     expect(res.charset).to.equal('utf-8');
     expect(res.type).to.equal('application/json');
-    expect(res.body).to.deep.equal(obj);
+    if(obj) expect(res.body).to.deep.equal(obj);
     return res;
   }
 }
@@ -44,46 +44,63 @@ describe('http resources', function() {
 
   var app;
   before(() => {
-    require('../models/firebase').setDatabase(firebaseMock.initClient());
+    firebaseMock.installMockClient(require('../models/firebase'));
     app = require('../app');
   })
 
   // TODO extract admin tests into another file.
   describe('/admin/init', function() {
-    beforeEach(() => firebaseMock.startServer({foo: 'bar'}));
-    afterEach(firebaseMock.stopServer);
-
     it('initializes the database if empty.', function() {
       return chai.request(app)
         .post('/admin/init')
         .then(expect200)
-        .then(expectJson({message: 'Database initialized.', data: 'bar'}));
+        .then(expectJson({message: 'Database initialized.'}));
     });
   });
 
   describe('/api/v1', function() {
+
+    describe('/games', function() {
+      // Handle shitty hostel wifi.
+      this.timeout(5000);
+
+      it('creates a game', function() {
+        const userId = 'user-id-foo';
+        app = require('../app');
+        return chai.request(app)
+          .post('/api/v1/games')
+          .send({userId: userId})
+          .then(expect200)
+          .then(expectNoCache)
+          .then(expectJson())
+          .then((res) => {
+            expect(res.body.gameKey).to.be.a('String')
+          });
+      });
+    });
+
     it('/ is reachable', function() {
       return chai.request(app)
         .get('/api/v1/')
         .then(expect200)
         .then(expectNoCache)
-        .then(expectJson({message: "hooray! welcome to api v1!"}))
+        .then(expectJson({message: "hooray! welcome to api v1!"}));
     });
 
     it('/message', function() {
-      firebaseMock.startServer({message: 'original message'});
-      const m = "New Message Value";
+      // Use a real firebase connection until firebase-server supports recent clients.
+      // firebaseMock.startServer({message: 'original message'});
+      const m = "New Message Value " + new Date();
       return chai.request(app)
         .post('/api/v1/message')
         .send({message: m})
         .then(expect200)
         .then(expectNoCache)
-        //.then(expectJson({message: m})) // See error in models/message.js
         .then(() => chai.request(app).get('/api/v1/message') )
         .then(expect200)
         .then(expectNoCache)
         .then(expectJson({message: m}))
-        .then(firebaseMock.stopServer);
+        // .then(firebaseMock.stopServer);
     });
   });
 });
