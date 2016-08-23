@@ -6,5 +6,12 @@
 
     <com.cheriot.horriblecards.views.MessageView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/new_game_button"
+        style="?metaButtonBarButtonStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/main_new_game"/>
 </LinearLayout>
