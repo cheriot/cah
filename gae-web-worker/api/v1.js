@@ -19,7 +19,6 @@ router.route('/message')
 
 router.route('/games')
   .post(function(req, res) {
-    const userId = req.body.userId;
     gameRepository
       .create(req.body.userId)
       .then((gameKey) => res.json({gameKey: gameKey}) );
