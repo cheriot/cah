@@ -38,9 +38,6 @@ repositories {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    // Other
-    compile 'com.jakewharton.timber:timber:4.3.0'
-
     // Tests
     testCompile 'junit:junit:4.12'
     testCompile "org.mockito:mockito-core:1.+"
@@ -58,6 +55,9 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
     testCompile 'com.squareup.okhttp3:mockwebserver:3.3.0'
+
+    // Logging
+    compile 'com.jakewharton.timber:timber:4.1.2'
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -9,6 +9,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GetTokenResult;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import timber.log.Timber;
 
 /**
@@ -16,25 +19,24 @@ import timber.log.Timber;
  */
 public class AuthenticationService {
 
-    static final String LOG_TAG = AuthenticationService.class.getSimpleName();
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private List<AuthenticationStateListener> mAuthenticationStateListeners;
     private FirebaseUser mFirebaseUser;
     private String mFirebaseToken;
 
     public AuthenticationService(FirebaseAuth auth) {
-        Timber.tag(this.getClass().getSimpleName());
-
         mAuth = auth != null ? auth : FirebaseAuth.getInstance();
+        mAuthenticationStateListeners = new ArrayList<>();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    Timber.d(LOG_TAG, "onAuthStateChanged:signed_in:" + user.getUid());
+                    Timber.d("onAuthStateChanged:signed_in:%s", user.getUid());
                     setSignedIn(user);
                 } else {
-                    Timber.d(LOG_TAG, "onAuthStateChanged:signed_out");
+                    Timber.d("onAuthStateChanged:signed_out");
                     setSignedOut();
                     signInAnonymously();
                 }
@@ -56,14 +58,28 @@ public class AuthenticationService {
 
             @Override
             public void onError(Exception e) {
-                Timber.e(LOG_TAG, "Error getting firebase token.", e);
+                Timber.e(e, "Error getting firebase token.");
             }
         });
+        for(AuthenticationStateListener listener : mAuthenticationStateListeners) {
+            listener.onSignedIn();
+        }
     }
 
     private void setSignedOut() {
         mFirebaseUser = null;
         mFirebaseToken = null;
+        for(AuthenticationStateListener listener : mAuthenticationStateListeners) {
+            listener.onSignedOut();
+        }
+    }
+
+    public void addAuthenticationStateListener(AuthenticationStateListener listener) {
+        mAuthenticationStateListeners.add(listener);
+    }
+
+    public void removeAuthenticationStateListener(AuthenticationStateListener listener) {
+        mAuthenticationStateListeners.remove(listener);
     }
 
     private void getToken(final TaskResultListener<String> taskResultListener) {
@@ -102,13 +118,13 @@ public class AuthenticationService {
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Timber.d(LOG_TAG, "signInAnonymously:onComplete:" + task.isSuccessful());
+                        Timber.d("signInAnonymously:onComplete:%s", task.isSuccessful());
 
                         if (task.isSuccessful()) {
                             setSignedIn(task.getResult().getUser());
                         } else {
                             setSignedOut();
-                            signInAnonymously();
+                            Timber.e(task.getException(), "Unable to sign in anonymously.");
                         }
                     }
                 });

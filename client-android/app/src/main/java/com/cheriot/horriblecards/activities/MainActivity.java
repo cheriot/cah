@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.cheriot.horriblecards.R;
 import com.cheriot.horriblecards.models.AuthenticationService;
+import com.cheriot.horriblecards.models.AuthenticationStateListener;
 import com.cheriot.horriblecards.models.GameService;
 
 import butterknife.BindView;
@@ -18,9 +19,20 @@ import butterknife.ButterKnife;
  * Created by cheriot on 8/22/16.
  */
 public class MainActivity extends AppCompatActivity implements GameView {
-    static final String LOG_TAG = MainActivity.class.getSimpleName();
+
     private GameService mGameService;
     private AuthenticationService mAuthenticationService;
+    AuthenticationStateListener mAuthenticationStateListener = new AuthenticationStateListener() {
+        @Override
+        public void onSignedIn() {
+            mNewGameButton.setEnabled(true);
+        }
+
+        @Override
+        public void onSignedOut() {
+            mNewGameButton.setEnabled(false);
+        }
+    };
 
     @BindView(R.id.create_game_button) Button mNewGameButton;
     @BindView(R.id.game_link) TextView mGameLink;
@@ -32,6 +44,9 @@ public class MainActivity extends AppCompatActivity implements GameView {
         ButterKnife.bind(this);
         mGameService = new GameService(this, null);
         mAuthenticationService = new AuthenticationService(null);
+
+        // Initialize to a signed out state until we know the current state.
+        mAuthenticationStateListener.onSignedOut();
     }
 
     public void createGame(View view) {
@@ -46,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements GameView {
     @Override
     public void onStart() {
         super.onStart();
+        mAuthenticationService.addAuthenticationStateListener(mAuthenticationStateListener);
         mAuthenticationService.start();
     }
 
@@ -53,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements GameView {
     public void onStop() {
         super.onStop();
         mAuthenticationService.stop();
+        mAuthenticationService.removeAuthenticationStateListener(mAuthenticationStateListener);
     }
 
 }

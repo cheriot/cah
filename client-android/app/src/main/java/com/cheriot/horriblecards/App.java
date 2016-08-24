@@ -3,6 +3,8 @@ package com.cheriot.horriblecards;
 import android.app.Application;
 import android.os.StrictMode;
 
+import timber.log.Timber;
+
 /**
  * Android Application
  *
@@ -28,6 +30,7 @@ public class App extends Application {
                     .penaltyLog()
                     .penaltyDropBox()
                     .build());
+            Timber.plant(new Timber.DebugTree());
         }
     }
 }

@@ -54,6 +54,7 @@ public class AuthenticationServiceTest {
 
         authStateListener.onAuthStateChanged(mFirebaseAuth);
 
+        // When the token becomes available, we're logged in.
         String token = "fake-token";
         verify(mockGetTokenTask).addOnCompleteListener(getTokenListenerArgCapture.capture());
         when(mockGetTokenTask.isSuccessful()).thenReturn(true);
