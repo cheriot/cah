@@ -11,6 +11,9 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
+ * Convert to a Presenter and survive config changes.
+ * https://medium.com/@czyrux/presenter-surviving-orientation-changes-with-loaders-6da6d86ffbbf
+ *
  * Created by cheriot on 8/23/16.
  */
 public class GameService {
