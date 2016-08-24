@@ -3,9 +3,10 @@ package com.cheriot.horriblecards.models;
 import com.cheriot.horriblecards.BuildConfig;
 
 import retrofit2.Call;
+import retrofit2.http.Field;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
-import retrofit2.http.Query;
 
 /**
  * The dealer handles game actions when
@@ -17,7 +18,8 @@ import retrofit2.http.Query;
 public interface Dealer {
     String API_VERSION = "/api/v1";
 
+    @FormUrlEncoded
     @POST(API_VERSION + "/games")
     @Headers("User-Agent: HorribleCards Android " + BuildConfig.VERSION_NAME)
-    Call<GameIdentifier> createGame(@Query("userId") String userId);
+    Call<GameIdentifier> createGame(@Field("userId") String userId);
 }

@@ -38,7 +38,7 @@ public class GameService {
             @Override
             public void onResponse(Call<GameIdentifier> call, Response<GameIdentifier> response) {
                 mGameView.displayGameUrl(response.body().getGameKey());
-                // subscribe to the game
+                // TODO subscribe to the game
             }
 
             @Override

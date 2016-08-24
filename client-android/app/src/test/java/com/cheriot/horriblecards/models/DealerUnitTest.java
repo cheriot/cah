@@ -55,8 +55,9 @@ public class DealerUnitTest {
         assertEquals("Received gameKey.", "mock-game-key", response.body().getGameKey());
 
         RecordedRequest request = server.takeRequest();
-        assertEquals("Received POST.", "POST", request.getMethod());
-        assertEquals("Received userId.", "/api/v1/games?userId=fake-user-id", request.getPath());
+        assertEquals("Request POST.", "POST", request.getMethod());
+        assertEquals("Request path.", "/api/v1/games", request.getPath());
+        assertEquals("Request userId in body.", "userId=fake-user-id", request.getBody().readUtf8());
     }
 
     @Test

@@ -5,28 +5,40 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cheriot.horriblecards.R;
+import com.cheriot.horriblecards.models.GameService;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Created by cheriot on 8/22/16.
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GameView {
     static final String LOG_TAG = MainActivity.class.getSimpleName();
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
+    private GameService mGameService;
+
+    @BindView(R.id.create_game_button) Button mNewGameButton;
+    @BindView(R.id.game_link) TextView mGameLink;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.main_activity);
+        ButterKnife.bind(this);
+        mGameService = new GameService(this, null);
 
         mAuth = FirebaseAuth.getInstance();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
@@ -43,6 +55,15 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+    }
+
+    public void createGame(View view) {
+        mGameService.createGame("fake-user-id");
+    }
+
+    @Override
+    public void displayGameUrl(String gameUrl) {
+        mGameLink.setText(gameUrl);
     }
 
     @Override
