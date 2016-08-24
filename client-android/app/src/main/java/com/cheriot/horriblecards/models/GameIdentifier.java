@@ -5,7 +5,7 @@ package com.cheriot.horriblecards.models;
  */
 public class GameIdentifier {
 
-    String gameKey;
+    private String gameKey;
 
     public String getGameKey() {
         return gameKey;

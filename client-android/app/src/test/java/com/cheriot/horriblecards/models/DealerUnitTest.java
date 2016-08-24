@@ -18,6 +18,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import static org.junit.Assert.*;
 
 /**
+ * Use okhttp's MockWebServer to test Dealer and figure out how Retrofit works.
  * Created by cheriot on 8/23/16.
  */
 public class DealerUnitTest {
