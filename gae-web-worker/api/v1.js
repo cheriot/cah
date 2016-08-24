@@ -21,7 +21,7 @@ router.route('/message')
 router.route('/games')
   .post(function(req, res) {
     if(_.isEmpty(req.body.userId)) res.status(401).json({error: 'Invalid userId.'});
-    gameRepository
+    else gameRepository
       .create(req.body.userId)
       .then((gameKey) => res.json({gameKey: gameKey}) );
   });
