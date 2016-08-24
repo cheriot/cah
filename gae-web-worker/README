@@ -1,2 +1,10 @@
 GAE URI
 https://cards-against-humanity-14b7e.appspot.com/
+
+See package.json for scripts.
+  $ npm run <name>
+
+You can read logs from the command line by running:
+  $ gcloud app logs read
+To view your application in the web browser run:
+  $ gcloud app browse
