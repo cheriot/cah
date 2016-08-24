@@ -61,7 +61,7 @@ describe('http resources', function() {
   describe('/api/v1', function() {
 
     describe('/games', function() {
-      // Handle shitty hostel wifi.
+      // Handle shitty hostel wifi (uses real firebase).
       this.timeout(5000);
 
       it('creates a game', function() {
@@ -76,6 +76,18 @@ describe('http resources', function() {
           .then((res) => {
             expect(res.body.gameKey).to.be.a('String')
           });
+      });
+
+      it('requires a userId', function() {
+        return chai.request(app)
+          .post('/api/v1/games')
+          .send()
+          .then(() => 'never called, but needed to get a promise')
+          .catch((err) => {
+            expect(err.status).to.eq(401);
+            return err.response;
+          })
+          .then(expectJson({error: 'Invalid userId.'}))
       });
     });
 

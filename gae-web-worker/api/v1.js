@@ -2,7 +2,8 @@
 
 const router = require('express').Router(),
   message = require('../models/message'),
-  gameRepository = require('../models/games');
+  gameRepository = require('../models/games'),
+  _ = require('lodash');
 
 router.get('/', function(req, res) {
   res.json({ message: 'hooray! welcome to api v1!' });
@@ -19,6 +20,7 @@ router.route('/message')
 
 router.route('/games')
   .post(function(req, res) {
+    if(_.isEmpty(req.body.userId)) res.status(401).json({error: 'Invalid userId.'});
     gameRepository
       .create(req.body.userId)
       .then((gameKey) => res.json({gameKey: gameKey}) );
