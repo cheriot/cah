@@ -41,6 +41,9 @@ router.route('/games')
 
 // Error handler. Must come after other routes and middleware.
 router.use(function(err, req, res, next) {
+  if(err.status == 500 || !err.status) {
+    console.error('Server Error:', err);
+  }
   res.status(err.status || 500)
      .json({error: err.message});
 });
