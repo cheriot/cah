@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements GameView {
     }
 
     public void createGame(View view) {
-        mGameService.createGame("fake-user-id");
+        mGameService.createGame();
     }
 
     @Override

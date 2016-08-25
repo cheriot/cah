@@ -1,14 +1,15 @@
 package com.cheriot.horriblecards.models;
 
-import android.util.Log;
-
 import com.cheriot.horriblecards.activities.GameView;
+
+import java.io.IOException;
 
 import javax.inject.Inject;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import timber.log.Timber;
 
 /**
  * Convert to a Presenter and survive config changes.
@@ -30,18 +31,31 @@ public class GameService {
         mAuthService = authService;
     }
 
-    public void createGame(String userId) {
-        Call<GameIdentifier> call = mDealer.createGame(mAuthService.getToken(), userId);
+    public void createGame() {
+        String token = mAuthService.getToken();
+        Timber.d("createGame with token %s", token);
+        Timber.d("createGame with token of length %d", token.length());
+        Call<GameIdentifier> call = mDealer.createGame(token);
         call.enqueue(new Callback<GameIdentifier>() {
+
             @Override
             public void onResponse(Call<GameIdentifier> call, Response<GameIdentifier> response) {
-                mGameView.displayGameUrl(response.body().getGameKey());
-                // TODO subscribe to the game
+                // All responses. Success and failure.
+                if(response.isSuccessful()) {
+                    mGameView.displayGameUrl(response.body().getGameKey());
+                } else {
+                    try {
+                        Timber.e("createGame error response %d %s", response.code(), response.errorBody().string());
+                    } catch (IOException ioe) {
+                        throw new RuntimeException(ioe);
+                    }
+                }
             }
 
             @Override
             public void onFailure(Call<GameIdentifier> call, Throwable t) {
-                Log.e(LOG_TAG, "Failed to start game.", t);
+                // Failures that are not responses from the server.
+                Timber.e(t, "Failed to start game.");
             }
         });
     }
