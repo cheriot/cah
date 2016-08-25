@@ -1,28 +1,21 @@
 'use strict';
 
 const router = require('express').Router(),
-  message = require('../models/message'),
-  gameRepository = require('../models/games'),
+  requireAuth = require('../models/auth').requireAuth,
+  games = require('../models/games'),
   _ = require('lodash');
 
-router.get('/', function(req, res) {
+// All routes require authentication.
+router.use(requireAuth);
+
+router.get('/', function foo(req, res) {
   res.json({ message: 'hooray! welcome to api v1!' });
 });
 
-router.route('/message')
-  .get(function(req, res) {
-    message.get().then((val) => res.json({message: val}));
-  })
-  .post(function(req, res) {
-    message.set(req.body.message);
-    res.json({success: true});
-  });
-
 router.route('/games')
   .post(function(req, res) {
-    if(_.isEmpty(req.body.userId)) res.status(401).json({error: 'Invalid userId.'});
-    else gameRepository
-      .create(req.body.userId)
+    games
+      .create(res.locals.uid)
       .then((gameKey) => res.json({gameKey: gameKey}) );
   });
 
@@ -46,9 +39,17 @@ router.route('/games')
 // - assign a new judge
 // - creates a new round
 
-console.error('Registered routes');
-const routes = router.stack.forEach((r) => {
-  console.error(r.route.methods, r.route.path);
+// Error handler. Must come after other routes and middleware.
+router.use(function(err, req, res, next) {
+  res.status(err.status || 500)
+     .json({error: err.message});
 });
+
+// DEBUG
+// console.error('Registered routes');
+// const routes = router.stack.forEach((r) => {
+//   if(r.route) console.error(r.route.methods, r.route.path);
+//   else console.error('middleware');
+// });
 
 module.exports = router;

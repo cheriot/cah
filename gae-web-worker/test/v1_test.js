@@ -1,7 +1,8 @@
 const chai = require('chai'),
   expect = chai.expect,
   chaiHttp = require('chai-http'),
-  firebaseMock = require('./firebase_mock');
+  firebaseMock = require('./firebase_mock'),
+  _ = require('lodash');
 
 chai.use(chaiHttp);
 
@@ -42,9 +43,17 @@ function error(err) {
 
 describe('http resources', function() {
 
-  var app;
+  var app, uid;
   before(() => {
     firebaseMock.installMockClient(require('../models/firebase'));
+    require('../models/auth').setAuth({
+      verifyIdToken: function(token) {
+        // If the test set an empty uid, reject.
+        if(_.isEmpty(uid)) return Promise.reject(new Error('Fake rejection.'));
+        // If the test set a uid, resolve.
+        else return Promise.resolve({uid: uid});
+      }
+    });
     app = require('../app');
   })
 
@@ -53,6 +62,7 @@ describe('http resources', function() {
     it('initializes the database if empty.', function() {
       return chai.request(app)
         .post('/admin/init')
+        .set('Authorization', 'fake-token')
         .then(expect200)
         .then(expectJson({message: 'Database initialized.'}));
     });
@@ -65,11 +75,10 @@ describe('http resources', function() {
       this.timeout(5000);
 
       it('creates a game', function() {
-        const userId = 'user-id-foo';
-        app = require('../app');
+        uid = 'fake-user-id';
         return chai.request(app)
           .post('/api/v1/games')
-          .send({userId: userId})
+          .set('Authorization', 'fake-token')
           .then(expect200)
           .then(expectNoCache)
           .then(expectJson())
@@ -78,7 +87,8 @@ describe('http resources', function() {
           });
       });
 
-      it('requires a userId', function() {
+      it('requires a token', function() {
+        uid = null;
         return chai.request(app)
           .post('/api/v1/games')
           .send()
@@ -87,32 +97,33 @@ describe('http resources', function() {
             expect(err.status).to.eq(401);
             return err.response;
           })
-          .then(expectJson({error: 'Invalid userId.'}))
+          .then(expectJson({error: 'No credentials found.'}))
+      });
+
+      it('fails when the token cannot be verified.', function() {
+        uid = null;
+        return chai.request(app)
+          .post('/api/v1/games')
+          .set('Authorization', 'fake-token')
+          .send()
+          .then(() => 'never called, but needed to get a promise')
+          .catch((err) => {
+            expect(err.status).to.eq(401);
+            return err.response;
+          })
+          .then(expectJson({error: 'Error authenticating: Fake rejection.'}));
       });
     });
 
     it('/ is reachable', function() {
+      uid = 'fake-user-id';
       return chai.request(app)
         .get('/api/v1/')
+         .set('Authorization', 'fake-token')
         .then(expect200)
         .then(expectNoCache)
         .then(expectJson({message: "hooray! welcome to api v1!"}));
     });
 
-    it('/message', function() {
-      // Use a real firebase connection until firebase-server supports recent clients.
-      // firebaseMock.startServer({message: 'original message'});
-      const m = "New Message Value " + new Date();
-      return chai.request(app)
-        .post('/api/v1/message')
-        .send({message: m})
-        .then(expect200)
-        .then(expectNoCache)
-        .then(() => chai.request(app).get('/api/v1/message') )
-        .then(expect200)
-        .then(expectNoCache)
-        .then(expectJson({message: m}))
-        // .then(firebaseMock.stopServer);
-    });
   });
 });
