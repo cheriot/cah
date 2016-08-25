@@ -45,8 +45,9 @@ describe('http resources', function() {
 
   var app, uid;
   before(() => {
-    firebaseMock.installMockClient(require('../models/firebase'));
-    require('../models/auth').setAuth({
+    const fb = require('../models/firebase');
+    firebaseMock.installMockClient(fb);
+    fb.setAuth({
       verifyIdToken: function(token) {
         // If the test set an empty uid, reject.
         if(_.isEmpty(uid)) return Promise.reject(new Error('Fake rejection.'));
