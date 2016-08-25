@@ -1,6 +1,9 @@
 GAE URI
 https://cards-against-humanity-14b7e.appspot.com/
 
+Google's Log Viewer
+https://console.cloud.google.com/logs/viewer
+
 See package.json for scripts.
   $ npm run <name>
 
