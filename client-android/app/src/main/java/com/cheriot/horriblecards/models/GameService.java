@@ -9,8 +9,6 @@ import javax.inject.Inject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Convert to a Presenter and survive config changes.
@@ -27,15 +25,7 @@ public class GameService {
     @Inject
     public GameService(GameView gameView, Dealer dealer) {
         mGameView = gameView;
-        if(dealer == null) {
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("https://cards-against-humanity-14b7e.appspot.com/")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .build();
-            mDealer = retrofit.create(Dealer.class);
-        } else {
-            mDealer = dealer;
-        }
+        mDealer = dealer;
     }
 
     public void createGame(String userId) {

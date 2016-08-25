@@ -3,6 +3,7 @@ package com.cheriot.horriblecards.modules;
 import android.app.Activity;
 
 import com.cheriot.horriblecards.activities.GameView;
+import com.cheriot.horriblecards.models.Dealer;
 import com.cheriot.horriblecards.models.GameService;
 
 import dagger.Module;
@@ -21,7 +22,7 @@ public class ActivityModule {
 
     @ActivityScope
     @Provides
-    public GameService provideGameService() {
-        return new GameService((GameView)activity, null);
+    public GameService provideGameService(Dealer dealer) {
+        return new GameService((GameView)activity, dealer);
     }
 }
