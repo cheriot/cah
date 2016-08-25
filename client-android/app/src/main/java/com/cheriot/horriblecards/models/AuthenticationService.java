@@ -26,7 +26,7 @@ public class AuthenticationService {
     private String mFirebaseToken;
 
     public AuthenticationService(FirebaseAuth auth) {
-        mAuth = auth != null ? auth : FirebaseAuth.getInstance();
+        mAuth = auth;
         mAuthenticationStateListeners = new ArrayList<>();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override

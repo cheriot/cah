@@ -7,10 +7,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.cheriot.horriblecards.App;
 import com.cheriot.horriblecards.R;
 import com.cheriot.horriblecards.models.AuthenticationService;
 import com.cheriot.horriblecards.models.AuthenticationStateListener;
 import com.cheriot.horriblecards.models.GameService;
+
+import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -21,7 +24,7 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity implements GameView {
 
     private GameService mGameService;
-    private AuthenticationService mAuthenticationService;
+    @Inject AuthenticationService mAuthenticationService;
     AuthenticationStateListener mAuthenticationStateListener = new AuthenticationStateListener() {
         @Override
         public void onSignedIn() {
@@ -41,10 +44,11 @@ public class MainActivity extends AppCompatActivity implements GameView {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
-        ButterKnife.bind(this);
-        mGameService = new GameService(this, null);
-        mAuthenticationService = new AuthenticationService(null);
 
+        ButterKnife.bind(this);
+        ((App)getApplication()).getAppComponent().inject(this);
+
+        mGameService = new GameService(this, null);
         // Initialize to a signed out state until we know the current state.
         mAuthenticationStateListener.onSignedOut();
     }
