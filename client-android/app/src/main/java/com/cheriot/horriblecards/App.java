@@ -1,8 +1,11 @@
 package com.cheriot.horriblecards;
 
+import android.app.Activity;
 import android.app.Application;
 import android.os.StrictMode;
 
+import com.cheriot.horriblecards.modules.ActivityComponent;
+import com.cheriot.horriblecards.modules.ActivityModule;
 import com.cheriot.horriblecards.modules.AppComponent;
 import com.cheriot.horriblecards.modules.AppModule;
 import com.cheriot.horriblecards.modules.DaggerAppComponent;
@@ -40,6 +43,10 @@ public class App extends Application {
                     .build());
             Timber.plant(new Timber.DebugTree());
         }
+    }
+
+    public ActivityComponent newActivityComponent(Activity activity) {
+        return appComponent.newActivityComponent(new ActivityModule(activity));
     }
 
     public AppComponent getAppComponent() {

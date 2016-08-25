@@ -23,7 +23,7 @@ import butterknife.ButterKnife;
  */
 public class MainActivity extends AppCompatActivity implements GameView {
 
-    private GameService mGameService;
+    @Inject GameService mGameService;
     @Inject AuthService mAuthService;
     AuthStateListener mAuthStateListener = new AuthStateListener() {
         @Override
@@ -46,9 +46,8 @@ public class MainActivity extends AppCompatActivity implements GameView {
         setContentView(R.layout.main_activity);
 
         ButterKnife.bind(this);
-        ((App)getApplication()).getAppComponent().inject(this);
+        ((App)getApplication()).newActivityComponent(this).inject(this);
 
-        mGameService = new GameService(this, null);
         // Initialize to a signed out state until we know the current state.
         mAuthStateListener.onSignedOut();
     }
