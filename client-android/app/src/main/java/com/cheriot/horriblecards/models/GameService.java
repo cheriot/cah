@@ -20,16 +20,18 @@ public class GameService {
 
     private static final String LOG_TAG = GameService.class.getSimpleName();
     private final GameView mGameView;
-    private Dealer mDealer;
+    private final Dealer mDealer;
+    private final AuthService mAuthService;
 
     @Inject
-    public GameService(GameView gameView, Dealer dealer) {
+    public GameService(GameView gameView, Dealer dealer, AuthService authService) {
         mGameView = gameView;
         mDealer = dealer;
+        mAuthService = authService;
     }
 
     public void createGame(String userId) {
-        Call<GameIdentifier> call = mDealer.createGame(userId);
+        Call<GameIdentifier> call = mDealer.createGame(mAuthService.getToken(), userId);
         call.enqueue(new Callback<GameIdentifier>() {
             @Override
             public void onResponse(Call<GameIdentifier> call, Response<GameIdentifier> response) {
