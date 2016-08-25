@@ -17,17 +17,17 @@ import timber.log.Timber;
 /**
  * Created by cheriot on 8/24/16.
  */
-public class AuthenticationService {
+public class AuthService {
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
-    private List<AuthenticationStateListener> mAuthenticationStateListeners;
+    private List<AuthStateListener> mAuthStateListeners;
     private FirebaseUser mFirebaseUser;
     private String mFirebaseToken;
 
-    public AuthenticationService(FirebaseAuth auth) {
+    public AuthService(FirebaseAuth auth) {
         mAuth = auth;
-        mAuthenticationStateListeners = new ArrayList<>();
+        mAuthStateListeners = new ArrayList<>();
         mAuthListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
@@ -61,7 +61,7 @@ public class AuthenticationService {
                 Timber.e(e, "Error getting firebase token.");
             }
         });
-        for(AuthenticationStateListener listener : mAuthenticationStateListeners) {
+        for(AuthStateListener listener : mAuthStateListeners) {
             listener.onSignedIn();
         }
     }
@@ -69,17 +69,17 @@ public class AuthenticationService {
     private void setSignedOut() {
         mFirebaseUser = null;
         mFirebaseToken = null;
-        for(AuthenticationStateListener listener : mAuthenticationStateListeners) {
+        for(AuthStateListener listener : mAuthStateListeners) {
             listener.onSignedOut();
         }
     }
 
-    public void addAuthenticationStateListener(AuthenticationStateListener listener) {
-        mAuthenticationStateListeners.add(listener);
+    public void addAuthStateListener(AuthStateListener listener) {
+        mAuthStateListeners.add(listener);
     }
 
-    public void removeAuthenticationStateListener(AuthenticationStateListener listener) {
-        mAuthenticationStateListeners.remove(listener);
+    public void removeAuthStateListener(AuthStateListener listener) {
+        mAuthStateListeners.remove(listener);
     }
 
     private void getToken(final TaskResultListener<String> taskResultListener) {

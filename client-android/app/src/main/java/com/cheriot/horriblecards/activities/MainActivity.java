@@ -9,8 +9,8 @@ import android.widget.TextView;
 
 import com.cheriot.horriblecards.App;
 import com.cheriot.horriblecards.R;
-import com.cheriot.horriblecards.models.AuthenticationService;
-import com.cheriot.horriblecards.models.AuthenticationStateListener;
+import com.cheriot.horriblecards.models.AuthService;
+import com.cheriot.horriblecards.models.AuthStateListener;
 import com.cheriot.horriblecards.models.GameService;
 
 import javax.inject.Inject;
@@ -24,8 +24,8 @@ import butterknife.ButterKnife;
 public class MainActivity extends AppCompatActivity implements GameView {
 
     private GameService mGameService;
-    @Inject AuthenticationService mAuthenticationService;
-    AuthenticationStateListener mAuthenticationStateListener = new AuthenticationStateListener() {
+    @Inject AuthService mAuthService;
+    AuthStateListener mAuthStateListener = new AuthStateListener() {
         @Override
         public void onSignedIn() {
             mNewGameButton.setEnabled(true);
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity implements GameView {
 
         mGameService = new GameService(this, null);
         // Initialize to a signed out state until we know the current state.
-        mAuthenticationStateListener.onSignedOut();
+        mAuthStateListener.onSignedOut();
     }
 
     public void createGame(View view) {
@@ -65,15 +65,15 @@ public class MainActivity extends AppCompatActivity implements GameView {
     @Override
     public void onStart() {
         super.onStart();
-        mAuthenticationService.addAuthenticationStateListener(mAuthenticationStateListener);
-        mAuthenticationService.start();
+        mAuthService.addAuthStateListener(mAuthStateListener);
+        mAuthService.start();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mAuthenticationService.stop();
-        mAuthenticationService.removeAuthenticationStateListener(mAuthenticationStateListener);
+        mAuthService.stop();
+        mAuthService.removeAuthStateListener(mAuthStateListener);
     }
 
 }

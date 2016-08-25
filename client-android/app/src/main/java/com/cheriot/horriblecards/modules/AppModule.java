@@ -2,7 +2,7 @@ package com.cheriot.horriblecards.modules;
 
 import android.app.Application;
 
-import com.cheriot.horriblecards.models.AuthenticationService;
+import com.cheriot.horriblecards.models.AuthService;
 import com.google.firebase.auth.FirebaseAuth;
 
 import javax.inject.Singleton;
@@ -30,8 +30,8 @@ public class AppModule {
 
     @Provides
     @Singleton
-    AuthenticationService providesAuthenticationService(FirebaseAuth firebaseAuth) {
-        return new AuthenticationService(firebaseAuth);
+    AuthService providesAuthService(FirebaseAuth firebaseAuth) {
+        return new AuthService(firebaseAuth);
     }
 
     @Provides

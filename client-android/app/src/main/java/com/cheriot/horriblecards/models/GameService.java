@@ -4,6 +4,8 @@ import android.util.Log;
 
 import com.cheriot.horriblecards.activities.GameView;
 
+import javax.inject.Inject;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -22,6 +24,7 @@ public class GameService {
     private final GameView mGameView;
     private Dealer mDealer;
 
+    @Inject
     public GameService(GameView gameView, Dealer dealer) {
         mGameView = gameView;
         if(dealer == null) {

@@ -19,9 +19,9 @@ import static org.mockito.Mockito.*;
 /**
  * Created by cheriot on 8/24/16.
  */
-public class AuthenticationServiceTest {
+public class AuthServiceTest {
 
-    private AuthenticationService mAuthenticationService;
+    private AuthService mAuthService;
     @Mock FirebaseAuth mFirebaseAuth;
     @Mock FirebaseUser mFirebaseUser;
     @Captor ArgumentCaptor<FirebaseAuth.AuthStateListener> authStateListenerArgumentCaptor;
@@ -29,12 +29,12 @@ public class AuthenticationServiceTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mAuthenticationService = new AuthenticationService(mFirebaseAuth);
+        mAuthService = new AuthService(mFirebaseAuth);
     }
 
     @Test
     public void testStart_success() {
-        mAuthenticationService.start();
+        mAuthService.start();
         // The firebase api is a terrible thing to mock.
 
         // Grab the listener we hand to firebase-auth and call it manually.
@@ -63,8 +63,8 @@ public class AuthenticationServiceTest {
         when(mockGetTokenTask.getResult()).thenReturn(mockGetTokenResult);
         getTokenListenerArgCapture.getValue().onComplete(mockGetTokenTask);
 
-        assertEquals("Returns uid.", uid, mAuthenticationService.getUid());
-        assertNotNull("Has token.", mAuthenticationService.getToken());
-        assertTrue("Is signed in.", mAuthenticationService.isAuthenticated());
+        assertEquals("Returns uid.", uid, mAuthService.getUid());
+        assertNotNull("Has token.", mAuthService.getToken());
+        assertTrue("Is signed in.", mAuthService.isAuthenticated());
     }
 }
