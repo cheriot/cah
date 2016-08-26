@@ -65,13 +65,11 @@ public class MainActivity extends AppCompatActivity implements GameView {
     public void onStart() {
         super.onStart();
         mAuthService.addAuthStateListener(mAuthStateListener);
-        mAuthService.start();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        mAuthService.stop();
         mAuthService.removeAuthStateListener(mAuthStateListener);
     }
 

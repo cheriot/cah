@@ -1,5 +1,7 @@
 package com.cheriot.horriblecards.modules;
 
+import com.cheriot.horriblecards.App;
+
 import javax.inject.Singleton;
 
 import dagger.Component;
@@ -10,5 +12,9 @@ import dagger.Component;
 @Singleton
 @Component(modules={AppModule.class})
 public interface AppComponent {
+
+    void inject(App app);
+
     ActivityComponent newActivityComponent(ActivityModule activityModule);
+
 }

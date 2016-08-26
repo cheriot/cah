@@ -50,7 +50,7 @@ public class AuthServiceTest {
         // Now verify that on login we fetch the token. Grab the listener for that async call.
         Task mockGetTokenTask = mock(Task.class);
         ArgumentCaptor<OnCompleteListener> getTokenListenerArgCapture = ArgumentCaptor.forClass(OnCompleteListener.class);
-        when(mFirebaseUser.getToken(false)).thenReturn(mockGetTokenTask);
+        when(mFirebaseUser.getToken(anyBoolean())).thenReturn(mockGetTokenTask);
 
         authStateListener.onAuthStateChanged(mFirebaseAuth);
 

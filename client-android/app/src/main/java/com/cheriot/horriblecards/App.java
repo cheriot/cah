@@ -4,11 +4,14 @@ import android.app.Activity;
 import android.app.Application;
 import android.os.StrictMode;
 
+import com.cheriot.horriblecards.models.AuthService;
 import com.cheriot.horriblecards.modules.ActivityComponent;
 import com.cheriot.horriblecards.modules.ActivityModule;
 import com.cheriot.horriblecards.modules.AppComponent;
 import com.cheriot.horriblecards.modules.AppModule;
 import com.cheriot.horriblecards.modules.DaggerAppComponent;
+
+import javax.inject.Inject;
 
 import timber.log.Timber;
 
@@ -20,6 +23,7 @@ import timber.log.Timber;
 public class App extends Application {
 
     private AppComponent appComponent;
+    @Inject AuthService mAuthService;
 
     @Override
     public void onCreate() {
@@ -28,6 +32,7 @@ public class App extends Application {
         appComponent = DaggerAppComponent.builder()
                 .appModule(new AppModule(this))
                 .build();
+        appComponent.inject(this);
         // Crash recording
 
         if (BuildConfig.DEBUG) {
@@ -43,6 +48,8 @@ public class App extends Application {
                     .build());
             Timber.plant(new Timber.DebugTree());
         }
+
+        mAuthService.start();
     }
 
     public ActivityComponent newActivityComponent(Activity activity) {

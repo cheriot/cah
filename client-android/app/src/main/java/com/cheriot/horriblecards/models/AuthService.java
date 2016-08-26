@@ -20,28 +20,28 @@ import timber.log.Timber;
 public class AuthService {
 
     private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
+    private AuthStateChangeListener mAuthListener;
     private List<AuthStateListener> mAuthStateListeners;
     private FirebaseUser mFirebaseUser;
     private String mFirebaseToken;
 
     public AuthService(FirebaseAuth auth) {
+        Timber.d("construct");
         mAuth = auth;
         mAuthStateListeners = new ArrayList<>();
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
+        mAuthListener = new AuthStateChangeListener() {
             @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                if (user != null) {
-                    Timber.d("onAuthStateChanged:signed_in:%s", user.getUid());
-                    setSignedIn(user);
-                } else {
-                    Timber.d("onAuthStateChanged:signed_out");
-                    setSignedOut();
-                    signInAnonymously();
-                }
+            public void onSignedIn(FirebaseUser user) {
+                setSignedIn(user);
+            }
+
+            @Override
+            public void onSignedOut() {
+                setSignedOut();
+                signInAnonymously();
             }
         };
+
     }
 
     public boolean isAuthenticated() {
@@ -50,6 +50,7 @@ public class AuthService {
 
     private void setSignedIn(FirebaseUser firebaseUser) {
         mFirebaseUser = firebaseUser;
+        Timber.d("setSignedIn %s", firebaseUser.getUid());
         getToken(new TaskResultListener<String>() {
             @Override
             public void onSuccess(String result) {
@@ -83,10 +84,12 @@ public class AuthService {
     }
 
     private void getToken(final TaskResultListener<String> taskResultListener) {
-        mFirebaseUser.getToken(false).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
+        Timber.d("getToken request");
+        mFirebaseUser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
             @Override
             public void onComplete(@NonNull Task<GetTokenResult> task) {
                 if(task.isSuccessful()) {
+                    Timber.d("getToken result %s", task.getResult().getToken());
                     taskResultListener.onSuccess(task.getResult().getToken());
                 } else {
                     taskResultListener.onError(task.getException());
@@ -113,17 +116,18 @@ public class AuthService {
         }
     }
 
+    public void signOut() {
+        mAuth.signOut();
+    }
+
     private void signInAnonymously() {
         mAuth.signInAnonymously()
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        Timber.d("signInAnonymously:onComplete:%s", task.isSuccessful());
-
                         if (task.isSuccessful()) {
-                            setSignedIn(task.getResult().getUser());
+                            Timber.e(task.getException(), "Signed in anonymously.");
                         } else {
-                            setSignedOut();
                             Timber.e(task.getException(), "Unable to sign in anonymously.");
                         }
                     }
