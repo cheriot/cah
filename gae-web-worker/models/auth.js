@@ -19,7 +19,7 @@ function requireAuth(req, res, next) {
     res.locals.uid = decodedToken.uid;
     next();
   }).catch(function(err) {
-    const msg = 'Error authenticating: ' + err.message;
+    const msg = 'Error authenticating: ' + err;
     console.error(msg + ' Token of length ' + token.length + ' ' + token);
     next(authError(res, msg));
   });

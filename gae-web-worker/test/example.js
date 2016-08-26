@@ -8,27 +8,37 @@ process.on('unhandledRejection', function(error, promise) {
 
 const _ = require('lodash');
 const firebase = require('firebase');
-firebase.database.enableLogging(true);
+//firebase.database.enableLogging(true);
 
-const serviceAccount = require('./config/cah-key-production.json');
+const serviceAccount = require('../config/cah-key-production.json');
 console.log('connect to', serviceAccount.project_id);
 firebase.initializeApp({
   serviceAccount: serviceAccount,
   databaseURL: 'https://cards-against-humanity-14b7e.firebaseio.com/'
 });
 const database = firebase.database();
-const gamesRef = database.ref('games');
+const auth = firebase.auth();
 
-const gameRef = gamesRef.push(
-  {
-    message: new Date().toString(),
-    createdAt: firebase.database.ServerValue.TIMESTAMP
-  },
-  (err) => console.log('error pushing', err)
-);
+// const gamesRef = database.ref('games');
+// const gameRef = gamesRef.push(
+//   {
+//     message: new Date().toString(),
+//     createdAt: firebase.database.ServerValue.TIMESTAMP
+//   },
+//   (err) => console.log('error pushing', err)
+// );
+// 
+// gameRef.then((a) => console.log('push then', a.key));
+// 
+// gameRef.once('value', (snap) => {
+//   console.log('snapshot', snap.val(), _.keys(snap));
+// });
 
-gameRef.then((a) => console.log('push then', a.key));
+const token = process.argv[2];
+console.log(token);
 
-gameRef.once('value', (snap) => {
-  console.log('snapshot', snap.val(), _.keys(snap));
+auth.verifyIdToken(token).then(function(decodedToken) {
+  console.log('found it', decodedToken);
+}).catch(function(err) {
+  console.log('error', err);
 });
