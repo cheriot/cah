@@ -112,7 +112,9 @@ describe('http resources', function() {
             expect(err.status).to.eq(401);
             return err.response;
           })
-          .then(expectJson({error: 'Error authenticating: Fake rejection.'}));
+          .then(expectJson({
+            error: 'Error authenticating: Error: Fake rejection.'
+          }));
       });
     });
 
