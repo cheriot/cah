@@ -11,7 +11,7 @@ import com.cheriot.horriblecards.App;
 import com.cheriot.horriblecards.R;
 import com.cheriot.horriblecards.models.AuthService;
 import com.cheriot.horriblecards.models.AuthStateListener;
-import com.cheriot.horriblecards.models.GameService;
+import com.cheriot.horriblecards.models.DealerService;
 
 import javax.inject.Inject;
 
@@ -23,7 +23,7 @@ import butterknife.ButterKnife;
  */
 public class MainActivity extends AppCompatActivity implements GameView {
 
-    @Inject GameService mGameService;
+    @Inject DealerService mDealerService;
     @Inject AuthService mAuthService;
     AuthStateListener mAuthStateListener = new AuthStateListener() {
         @Override
@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements GameView {
     }
 
     public void createGame(View view) {
-        mGameService.createGame();
+        mDealerService.createGame();
     }
 
     @Override

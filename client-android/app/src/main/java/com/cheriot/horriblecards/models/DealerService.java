@@ -17,15 +17,14 @@ import timber.log.Timber;
  *
  * Created by cheriot on 8/23/16.
  */
-public class GameService {
+public class DealerService {
 
-    private static final String LOG_TAG = GameService.class.getSimpleName();
     private final GameView mGameView;
     private final Dealer mDealer;
     private final AuthService mAuthService;
 
     @Inject
-    public GameService(GameView gameView, Dealer dealer, AuthService authService) {
+    public DealerService(GameView gameView, Dealer dealer, AuthService authService) {
         mGameView = gameView;
         mDealer = dealer;
         mAuthService = authService;

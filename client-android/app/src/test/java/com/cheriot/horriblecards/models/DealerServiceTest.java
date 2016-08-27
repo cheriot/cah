@@ -19,9 +19,9 @@ import static org.mockito.Mockito.*;
 /**
  * Created by cheriot on 8/24/16.
  */
-public class GameServiceTest {
+public class DealerServiceTest {
 
-    private GameService mGameService;
+    private DealerService mDealerService;
     @Mock GameView mMockGameView;
     @Mock Dealer mMockDealer;
     @Mock AuthService mAuthService;
@@ -29,7 +29,7 @@ public class GameServiceTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mGameService = new GameService(mMockGameView, mMockDealer, mAuthService);
+        mDealerService = new DealerService(mMockGameView, mMockDealer, mAuthService);
     }
 
     @Test
@@ -45,7 +45,7 @@ public class GameServiceTest {
             }
         });
 
-        mGameService.createGame();
+        mDealerService.createGame();
 
         verify(mMockDealer).createGame(token);
         ArgumentCaptor<Callback> callbackCaptor = ArgumentCaptor.forClass(Callback.class);
