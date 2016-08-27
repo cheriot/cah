@@ -1,7 +1,5 @@
 package com.cheriot.horriblecards.models;
 
-import com.cheriot.horriblecards.activities.GameView;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,14 +20,14 @@ import static org.mockito.Mockito.*;
 public class DealerServiceTest {
 
     private DealerService mDealerService;
-    @Mock GameView mMockGameView;
+    @Mock TaskResultListener mMockTaskResultListener;
     @Mock Dealer mMockDealer;
     @Mock AuthService mAuthService;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mDealerService = new DealerService(mMockGameView, mMockDealer, mAuthService);
+        mDealerService = new DealerService(mMockDealer, mAuthService);
     }
 
     @Test
@@ -45,7 +43,7 @@ public class DealerServiceTest {
             }
         });
 
-        mDealerService.createGame();
+        mDealerService.createGame(mMockTaskResultListener);
 
         verify(mMockDealer).createGame(token);
         ArgumentCaptor<Callback> callbackCaptor = ArgumentCaptor.forClass(Callback.class);
@@ -57,6 +55,6 @@ public class DealerServiceTest {
         body.setGameKey(gameKey);
         callbackCaptor.getValue().onResponse(null, Response.success(body));
 
-        verify(mMockGameView).displayGameUrl(gameKey);
+        verify(mMockTaskResultListener).onSuccess(gameKey);
     }
 }

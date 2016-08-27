@@ -1,7 +1,5 @@
 package com.cheriot.horriblecards.models;
 
-import com.cheriot.horriblecards.activities.GameView;
-
 import java.io.IOException;
 
 import javax.inject.Inject;
@@ -19,18 +17,16 @@ import timber.log.Timber;
  */
 public class DealerService {
 
-    private final GameView mGameView;
     private final Dealer mDealer;
     private final AuthService mAuthService;
 
     @Inject
-    public DealerService(GameView gameView, Dealer dealer, AuthService authService) {
-        mGameView = gameView;
+    public DealerService(Dealer dealer, AuthService authService) {
         mDealer = dealer;
         mAuthService = authService;
     }
 
-    public void createGame() {
+    public void createGame(final TaskResultListener<String> listener) {
         String token = mAuthService.getToken();
         Timber.d("createGame with token %s", token);
         Timber.d("createGame with token of length %d", token.length());
@@ -41,13 +37,10 @@ public class DealerService {
             public void onResponse(Call<GameIdentifier> call, Response<GameIdentifier> response) {
                 // All responses. Success and failure.
                 if(response.isSuccessful()) {
-                    mGameView.displayGameUrl(response.body().getGameKey());
+                    listener.onSuccess(response.body().getGameKey());
                 } else {
-                    try {
-                        Timber.e("createGame error response %d %s", response.code(), response.errorBody().string());
-                    } catch (IOException ioe) {
-                        throw new RuntimeException(ioe);
-                    }
+                    logErrorResponse("createGame", response);
+                    listener.onError(null);
                 }
             }
 
@@ -64,5 +57,13 @@ public class DealerService {
     }
 
     public void joinGame(String gameKey) {
+    }
+
+    private static void logErrorResponse(String msg, Response response) {
+        try {
+            Timber.e("%s response %d %s", msg, response.code(), response.errorBody().string());
+        } catch (IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
     }
 }

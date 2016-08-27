@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.cheriot.horriblecards.models.AuthService;
 import com.cheriot.horriblecards.models.Dealer;
+import com.cheriot.horriblecards.models.DealerService;
 import com.google.firebase.auth.FirebaseAuth;
 
 import javax.inject.Singleton;
@@ -51,5 +52,11 @@ public class AppModule {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         return retrofit.create(Dealer.class);
+    }
+
+    @Provides
+    @Singleton
+    public DealerService provideDealerService(Dealer dealer, AuthService authService) {
+        return new DealerService(dealer, authService);
     }
 }
