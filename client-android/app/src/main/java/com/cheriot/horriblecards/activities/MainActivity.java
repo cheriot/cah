@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import timber.log.Timber;
 
 /**
  * Created by cheriot on 8/22/16.
@@ -48,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements GameView, AuthSta
 
     @Override
     public void onSignedIn() {
+        Timber.d("Allow game creation.");
         mNewGameButton.setEnabled(true);
     }
 

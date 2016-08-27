@@ -6,6 +6,8 @@ import com.cheriot.horriblecards.models.AuthService;
 import com.cheriot.horriblecards.models.Dealer;
 import com.cheriot.horriblecards.models.DealerService;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import javax.inject.Singleton;
 
@@ -58,5 +60,11 @@ public class AppModule {
     @Singleton
     public DealerService provideDealerService(Dealer dealer, AuthService authService) {
         return new DealerService(dealer, authService);
+    }
+
+    @Provides
+    @Singleton
+    public DatabaseReference providesDatabaseReference() {
+        return FirebaseDatabase.getInstance().getReference();
     }
 }
