@@ -4,7 +4,7 @@
   "description": "REST API for a cards against humanity knock off. Runs on Google's App Engine Flexible Environment.",
   "main": "app.js",
   "scripts": {
-    "test": "mocha test/v1_test.js",
+    "test": "mocha test/*_test.js test/**/*_test.js",
     "start": "node app.js",
     "monitor": "nodemon app.js",
     "deploy": "gcloud app deploy"

@@ -1,12 +1,13 @@
 'use strict';
 
 const firebase = require('./firebase'),
-  assert = require('assert');
+  assert = require('assert'),
+  id_conceal = require('./id_conceal');
 
 function fetchGameId() {
   function incrementSequence (current) {
     if(current) return current+1;
-    else return 1;
+    else return 10000;
   }
 
   return firebase.ref('gameSequence')
@@ -16,16 +17,13 @@ function fetchGameId() {
       } else if (!committed) {
         console.error('gameSequence: Aborted transaction.');
       }
-      console.error('gameSequence', snapshot.val());
       return snapshot.val();
     })
     .then((transactionResult) => transactionResult.snapshot.val());
 }
 
 function concealCode(gameId) {
-  console.error('concealCode', gameId);
-  // TODO conceal
-  return gameId;
+  return id_conceal.encode(gameId);
 }
 
 function createGame(uid, gameCode) {
@@ -52,24 +50,6 @@ module.exports.create = (uid) => {
     .then((r) => r.key);
 }
 
-// public static string Conceal(string value, string wheel)
-// {
-//     var alphabet = sortedAlphabet(wheel);
-//     var distinctChars = wheel.Distinct().ToArray();
-//     if (distinctChars.Length != wheel.Length)
-//         throw (new ArgumentException("Error: Wheel contains duplicate characters."));
-//     string result = "";
-//     for (int i = 0; i < value.Length; i++)
-//     {
-//         int letterPosition = Array.IndexOf(alphabet, value[i]);
-//         if (letterPosition == -1)
-//             throw (new ArgumentException("Error: supplied character '"
-//                 + value[i] + "' does not appear in code wheel.", value));
-//         char encodedLetter = wheel[(letterPosition + i) % wheel.Length];
-//         result += encodedLetter;
-//     }
-//     return result;
-// }
 /*
  * Brainstorming data formats
 
