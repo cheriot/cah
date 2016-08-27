@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity implements GameView, AuthSta
         ButterKnife.bind(this);
         ((App) getApplication()).newActivityComponent(this).inject(this);
 
+        mChooseGamePresenter.setGameView(this);
+
         // Initialize to a signed out state until we know the current state.
         onSignedOut();
     }

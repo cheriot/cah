@@ -19,11 +19,11 @@ import timber.log.Timber;
  */
 public class AuthService {
 
-    private FirebaseAuth mAuth;
-    private AuthStateChangeListener mAuthListener;
-    private List<AuthStateListener> mAuthStateListeners;
-    private FirebaseUser mFirebaseUser;
-    private String mFirebaseToken;
+    FirebaseAuth mAuth;
+    AuthStateChangeListener mAuthListener;
+    List<AuthStateListener> mAuthStateListeners;
+    FirebaseUser mFirebaseUser;
+    String mFirebaseToken;
 
     public AuthService(FirebaseAuth auth) {
         Timber.d("construct");
@@ -76,6 +76,8 @@ public class AuthService {
     }
 
     public void addAuthStateListener(AuthStateListener listener) {
+        if(isAuthenticated()) listener.onSignedIn();
+        else listener.onSignedOut();
         mAuthStateListeners.add(listener);
     }
 
