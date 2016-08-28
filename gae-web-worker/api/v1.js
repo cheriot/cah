@@ -8,6 +8,16 @@ const router = require('express').Router(),
 // All routes require authentication.
 router.use(requireAuth);
 
+function requireBody(req, field) {
+  const value = req.body[field];
+  if(value) return value;
+  else {
+    const err = new Error('Required field ' + field + ' is empty.');
+    err.status = 400;
+    throw err;
+  }
+}
+
 router.get('/', function foo(req, res) {
   res.json({ message: 'hooray! welcome to api v1!' });
 });
@@ -16,33 +26,29 @@ router.route('/games')
   .post(function(req, res) {
     games
       .create(res.locals.uid)
-      .then((gameKey) => res.json({gameKey: gameKey}) );
+      .then((game) => res.json(game) );
   });
 
-// POST /games/:game_id/players
-// join a game
-// - what player state is needed?
-// - deals initial hand if game has already started
-
-// DELETE /games/:game_id/players
-// leave a game
-// - leave everything in the hand
-
-// PATCH /games/:game_id/start
-// start a game
-// - set the initial judge
-// - deal hands
-
-// POST /games/:game_id/round/winner/:card_id
-// select the winning card
-// - update score board
-// - assign a new judge
-// - creates a new round
+router.route('/games/join')
+  .post(function(req, res) {
+    const gameCode = requireBody(req, 'gameCode');
+    games
+      .join(res.locals.uid, gameCode)
+      .then((result) => {
+        if(result.error) {
+          res.status(404).json(result);
+        } else {
+          res.json(result);
+        }
+      });
+  });
 
 // Error handler. Must come after other routes and middleware.
 router.use(function(err, req, res, next) {
   if(err.status == 500 || !err.status) {
     console.error('Server Error:', err);
+  } else {
+    console.error('Client Error:', err);
   }
   res.status(err.status || 500)
      .json({error: err.message});

@@ -2,7 +2,8 @@
 
 const firebase = require('./firebase'),
   assert = require('assert'),
-  id_conceal = require('./id_conceal');
+  id_conceal = require('./id_conceal'),
+  _ = require('lodash');
 
 function fetchGameId() {
   function incrementSequence (current) {
@@ -22,32 +23,60 @@ function fetchGameId() {
     .then((transactionResult) => transactionResult.snapshot.val());
 }
 
-function concealCode(gameId) {
-  return id_conceal.encode(gameId);
-}
-
 function createGame(uid, gameCode) {
   assert(gameCode, 'Valid gameCode required.');
 
   return firebase.ref('games').push({
     gameCode: gameCode,
     players: {[uid]: true},
-    created: {
-      // Time since the unix epock in ms.
-      at: firebase.timestamp,
-      uid: uid
-    }
+    // Time since the unix epock in ms.
+    createdAt: firebase.timestamp,
+    createdBy: uid
   });
+}
+
+function findGameByCode(gameCode) {
+  return firebase.ref('games')
+    .orderByChild('gameCode')
+    .equalTo(gameCode)
+    .limitToLast(1)
+    .once('value')
+    .then((snapshot) => {
+      const val = snapshot.val();
+      // val is { gameKey: {gameCode, createdAt, createdBy, ...}}
+      const gameKey = _.keys(val)[0];
+      const game = val[gameKey];
+      game.gameKey = gameKey;
+      if(snapshot.exists()) {
+        return game;
+      } else {
+        return {error: 'Game not found'};
+      }
+    });
 }
 
 module.exports.create = (uid) => {
   assert(uid, 'Valid uid required.');
 
   return fetchGameId()
-    .then(concealCode)
+    .then((gameKey) => id_conceal.encode(gameKey))
     .then((gameCode) => createGame(uid, gameCode))
-    // Make sure the write finishes before sending a response.
-    .then((r) => r.key);
+    // #then will make sure the write finishes before sending a response.
+    .then((gameRef) => gameRef.once('value'))
+    .then((snap) => {
+      return { gameKey: snap.key, gameCode: snap.val().gameCode };
+    });
+}
+
+module.exports.join = (uid, gameCode) => {
+  return findGameByCode(gameCode)
+    .then((game) => {
+      console.error('now add to players', game);
+      return firebase
+        .ref('games/'+game.gameKey+'/players/'+uid)
+        .set(true)
+        .then(() => _.pick(game, ['gameKey', 'gameCode']));
+    });
 }
 
 /*

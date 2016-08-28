@@ -72,10 +72,9 @@ describe('http resources', function() {
   describe('/api/v1', function() {
 
     describe('/games', function() {
-      // Handle shitty hostel wifi (uses real firebase).
-      this.timeout(5000);
 
       it('creates a game', function() {
+        this.timeout(5000); // Hitting a live firebase.
         uid = 'fake-user-id';
         return chai.request(app)
           .post('/api/v1/games')
@@ -88,7 +87,7 @@ describe('http resources', function() {
           });
       });
 
-      it('requires a token', function() {
+      it('requires authentication', function() {
         uid = null;
         return chai.request(app)
           .post('/api/v1/games')
@@ -126,6 +125,51 @@ describe('http resources', function() {
         .then(expect200)
         .then(expectNoCache)
         .then(expectJson({message: "hooray! welcome to api v1!"}));
+    });
+
+    describe('/games/join', function() {
+      it('requires authentication', function() {
+        uid = null;
+        return chai.request(app)
+          .post('/api/v1/games')
+          .send()
+          .then(() => 'never called, but needed to get a promise')
+          .catch((err) => {
+            expect(err.status).to.eq(401);
+            return err.response;
+          })
+          .then(expectJson({error: 'No credentials found.'}))
+      });
+
+      it('accepts the gameCode and responds with the gameKey', function() {
+        this.timeout(5000); // Hitting a live firebase.
+
+        // Create a game and then join it.
+        uid = 'fake-user-id';
+        var gameKey, gameCode;
+        return chai.request(app)
+          .post('/api/v1/games')
+          .set('Authorization', 'fake-token')
+          .then(expect200)
+          .then((res) => {
+            expect(res.body.gameKey).to.be.a('String')
+            gameKey = res.body.gameKey;
+            gameCode = res.body.gameCode;
+          })
+          .then(() => {
+            uid = 'second-fake-user-id';
+            return chai.request(app)
+              .post('/api/v1/games/join')
+              .set('Authorization', 'fake-token')
+              .send({gameCode: gameCode});
+          })
+          .then(expect200)
+          .then((res) => {
+            expect(res.body.gameKey).to.eq(gameKey);
+            expect(res.body.gameCode).to.eq(gameCode);
+          });
+
+      });
     });
 
   });
