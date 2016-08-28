@@ -27,6 +27,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".activities.PlayGameActivity"
+            android:label="Play!"
+            android:theme="@style/AppTheme.NoTitleBar">
+        </activity>
     </application>
 
 </manifest>

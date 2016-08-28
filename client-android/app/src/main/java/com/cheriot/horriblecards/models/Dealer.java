@@ -9,7 +9,7 @@ import retrofit2.http.POST;
 
 /**
  * The dealer handles game actions when
- * 1. a player taking that action can cheat.
+ * 1. a player taking that action can cheat
  * 2. putting that action on the server makes it easier to support old clients
  *
  * Tokens are from the FirebaseAuth api. Potentially pull that into a request interceptor.
@@ -23,4 +23,8 @@ public interface Dealer {
     @POST(API_VERSION + "/games")
     @Headers("User-Agent: HorribleCards Android " + BuildConfig.VERSION_NAME)
     Call<GameIdentifier> createGame(@Header(AUTH_HEADER) String token);
+
+    @POST(API_VERSION + "/games/join")
+    @Headers("User-Agent: HorribleCards Android " + BuildConfig.VERSION_NAME)
+    Call<GameIdentifier> joinGame(@Header(AUTH_HEADER) String token);
 }

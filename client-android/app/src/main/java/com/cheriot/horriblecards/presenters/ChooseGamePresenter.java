@@ -43,16 +43,31 @@ public class ChooseGamePresenter {
         });
     }
 
-    public void findGame(String gameId) {
+    private void findGame(String gameId) {
         mFirebaseGame.fetchGameCode(gameId, new TaskResultListener<String>() {
             @Override
             public void onSuccess(String gameCode) {
-                getChooseGameView().displayGameUrl(gameCode);
+                getChooseGameView().startGame(gameCode);
             }
 
             @Override
             public void onError(Exception e) {
                 getChooseGameView().displayError("Error accessing game.");
+            }
+        });
+    }
+
+    public void joinGame(String inviteCode) {
+        Timber.d("joinGame %s", inviteCode);
+        mDealerService.joinGame(inviteCode, new TaskResultListener<String>() {
+            @Override
+            public void onSuccess(String result) {
+                getChooseGameView().startGame(result);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                getChooseGameView().displayError("Error join game.");
             }
         });
     }

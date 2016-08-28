@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements ChooseGameView, A
     }
 
     public void joinGame(View view) {
+        mChooseGamePresenter.joinGame(mJoinGameCode.getText().toString());
     }
 
     @Override
@@ -84,8 +85,8 @@ public class MainActivity extends AppCompatActivity implements ChooseGameView, A
     }
 
     @Override
-    public void displayGameUrl(String gameUrl) {
-        mGameLink.setText(gameUrl);
+    public void startGame(String gameKey) {
+        PlayGameActivity.startActivity(this, gameKey);
     }
 
     @Override

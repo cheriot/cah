@@ -1,6 +1,7 @@
 package com.cheriot.horriblecards.modules;
 
 import com.cheriot.horriblecards.activities.MainActivity;
+import com.cheriot.horriblecards.activities.PlayGameActivity;
 
 import dagger.Subcomponent;
 
@@ -11,4 +12,5 @@ import dagger.Subcomponent;
 @Subcomponent(modules={ActivityModule.class})
 public interface ActivityComponent {
     void inject(MainActivity activity);
+    void inject(PlayGameActivity activity);
 }

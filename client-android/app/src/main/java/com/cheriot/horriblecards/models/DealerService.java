@@ -1,5 +1,7 @@
 package com.cheriot.horriblecards.models;
 
+import android.accounts.AuthenticatorException;
+
 import java.io.IOException;
 
 import javax.inject.Inject;
@@ -27,10 +29,7 @@ public class DealerService {
     }
 
     public void createGame(final TaskResultListener<String> listener) {
-        String token = mAuthService.getToken();
-        Timber.d("createGame with token %s", token);
-        Timber.d("createGame with token of length %d", token.length());
-        Call<GameIdentifier> call = mDealer.createGame(token);
+        Call<GameIdentifier> call = mDealer.createGame(getToken(listener));
         call.enqueue(new Callback<GameIdentifier>() {
 
             @Override
@@ -52,11 +51,30 @@ public class DealerService {
         });
     }
 
-    public void startGame() {
-        // Creator only.
+    public void joinGame(String inviteCode, final TaskResultListener<String> listener) {
+        Call<GameIdentifier> call = mDealer.createGame(getToken(listener));
+        call.enqueue(new Callback<GameIdentifier>() {
+            @Override
+            public void onResponse(Call<GameIdentifier> call, Response<GameIdentifier> response) {
+                if(response.isSuccessful()) {
+                    listener.onSuccess(response.body().getGameKey());
+                } else {
+                    logErrorResponse("joinGame", response);
+                    listener.onError(null);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GameIdentifier> call, Throwable t) {
+
+            }
+        });
     }
 
-    public void joinGame(String gameKey) {
+    private String getToken(TaskResultListener listener) {
+        String token = mAuthService.getToken();
+        if(token.isEmpty()) listener.onError(new AuthenticatorException("Not authenticated."));
+        return token;
     }
 
     private static void logErrorResponse(String msg, Response response) {
