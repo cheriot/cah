@@ -11,7 +11,7 @@ describe('id_conceal.js', function() {
   it('uses 32 characters for base32', function() {
     // If the base or readableWheel change, there needs to
     // be a migration to prevent duplicate codes.
-    // Maybe just reset the sequence to 1.
+
     expect(id_conceal._base32Wheel.length).to.eq(32);
   });
 
