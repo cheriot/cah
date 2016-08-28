@@ -5,7 +5,7 @@ import com.cheriot.horriblecards.models.AuthStateListener;
 /**
  * Created by cheriot on 8/24/16.
  */
-public interface GameView extends AuthStateListener {
+public interface ChooseGameView extends AuthStateListener {
     void displayGameUrl(String gameUrl);
     void displayError(String msg);
 }

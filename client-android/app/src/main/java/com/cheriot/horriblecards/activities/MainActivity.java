@@ -26,7 +26,7 @@ import timber.log.Timber;
 /**
  * Created by cheriot on 8/22/16.
  */
-public class MainActivity extends AppCompatActivity implements GameView, AuthStateListener {
+public class MainActivity extends AppCompatActivity implements ChooseGameView, AuthStateListener {
 
     @Inject ChooseGamePresenter mChooseGamePresenter;
 
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements GameView, AuthSta
         ButterKnife.bind(this);
         ((App) getApplication()).newActivityComponent(this).inject(this);
 
-        mChooseGamePresenter.setGameView(this);
+        mChooseGamePresenter.setChooseGameView(this);
         mJoinGameCode.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
         mJoinGameCode.setImeActionLabel("Join", KeyEvent.KEYCODE_ENTER);
         mJoinGameCode.setImeOptions(EditorInfo.IME_ACTION_DONE);

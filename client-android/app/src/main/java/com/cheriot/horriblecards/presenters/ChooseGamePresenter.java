@@ -1,6 +1,6 @@
 package com.cheriot.horriblecards.presenters;
 
-import com.cheriot.horriblecards.activities.GameView;
+import com.cheriot.horriblecards.activities.ChooseGameView;
 import com.cheriot.horriblecards.models.AuthService;
 import com.cheriot.horriblecards.models.DealerService;
 import com.cheriot.horriblecards.models.FirebaseGame;
@@ -19,7 +19,7 @@ public class ChooseGamePresenter {
     @Inject FirebaseGame mFirebaseGame;
     @Inject AuthService mAuthService;
 
-    GameView gameView;
+    ChooseGameView chooseGameView;
 
     @Inject
     public ChooseGamePresenter(DealerService dealerService, FirebaseGame firebaseGame, AuthService authService) {
@@ -38,7 +38,7 @@ public class ChooseGamePresenter {
 
             @Override
             public void onError(Exception e) {
-                getGameView().displayError("Error creating a new Game.");
+                getChooseGameView().displayError("Error creating a new Game.");
             }
         });
     }
@@ -47,29 +47,29 @@ public class ChooseGamePresenter {
         mFirebaseGame.fetchGameCode(gameId, new TaskResultListener<String>() {
             @Override
             public void onSuccess(String gameCode) {
-                getGameView().displayGameUrl(gameCode);
+                getChooseGameView().displayGameUrl(gameCode);
             }
 
             @Override
             public void onError(Exception e) {
-                getGameView().displayError("Error accessing game.");
+                getChooseGameView().displayError("Error accessing game.");
             }
         });
     }
 
     public void onStart() {
-        mAuthService.addAuthStateListener(gameView);
+        mAuthService.addAuthStateListener(chooseGameView);
     }
 
     public void onStop() {
-        mAuthService.removeAuthStateListener(gameView);
+        mAuthService.removeAuthStateListener(chooseGameView);
     }
 
-    public GameView getGameView() {
-        return gameView;
+    public ChooseGameView getChooseGameView() {
+        return chooseGameView;
     }
 
-    public void setGameView(GameView gameView) {
-        this.gameView = gameView;
+    public void setChooseGameView(ChooseGameView chooseGameView) {
+        this.chooseGameView = chooseGameView;
     }
 }
