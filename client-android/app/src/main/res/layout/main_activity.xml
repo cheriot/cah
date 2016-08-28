@@ -1,24 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/game_link"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:keepScreenOn="true"
-        android:textColor="#33b5e5"
-        android:textSize="50sp"
-        android:textStyle="bold"/>
+        android:orientation="vertical"
+        android:layout_weight="1">
 
-    <Button
-        android:id="@+id/create_game_button"
-        style="?metaButtonBarButtonStyle"
+        <TextView
+            android:id="@+id/game_link"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:keepScreenOn="true"
+            android:textColor="#33b5e5"
+            android:textSize="50sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Start a game and invite friends."
+            android:textColor="@color/black_text"/>
+
+        <Button
+            android:id="@+id/create_game_button"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="createGame"
+            android:text="@string/main_create_game"/>
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="createGame"
-        android:text="@string/main_create_game"/>
+        android:orientation="vertical"
+        android:layout_weight="1">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Have a code to join a friend's game?"
+            android:textColor="@color/black_text"/>
+
+        <EditText
+            android:id="@+id/join_game_code"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:inputType="textCapCharacters|textNoSuggestions"
+            android:imeOptions="actionDone"
+            android:minWidth="65sp"
+            android:textSize="30sp"
+            android:typeface="monospace"/>
+
+        <Button
+            android:id="@+id/join_game_button"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="joinGame"
+            android:text="Join Game"/>
+    </LinearLayout>
 </LinearLayout>

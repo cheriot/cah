@@ -3,8 +3,12 @@ package com.cheriot.horriblecards.activities;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputFilter;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,8 +30,9 @@ public class MainActivity extends AppCompatActivity implements GameView, AuthSta
 
     @Inject ChooseGamePresenter mChooseGamePresenter;
 
-    @BindView(R.id.create_game_button) Button mNewGameButton;
     @BindView(R.id.game_link) TextView mGameLink;
+    @BindView(R.id.create_game_button) Button mNewGameButton;
+    @BindView(R.id.join_game_code) EditText mJoinGameCode;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,6 +43,18 @@ public class MainActivity extends AppCompatActivity implements GameView, AuthSta
         ((App) getApplication()).newActivityComponent(this).inject(this);
 
         mChooseGamePresenter.setGameView(this);
+        mJoinGameCode.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
+        mJoinGameCode.setImeActionLabel("Join", KeyEvent.KEYCODE_ENTER);
+        mJoinGameCode.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        mJoinGameCode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if(actionId == EditorInfo.IME_ACTION_DONE) {
+                    joinGame(mJoinGameCode);
+                }
+                return false; // false so the Keyboard will close
+            }
+        });
 
         // Initialize to a signed out state until we know the current state.
         onSignedOut();
@@ -45,6 +62,9 @@ public class MainActivity extends AppCompatActivity implements GameView, AuthSta
 
     public void createGame(View view) {
         mChooseGamePresenter.createGame();
+    }
+
+    public void joinGame(View view) {
     }
 
     @Override
