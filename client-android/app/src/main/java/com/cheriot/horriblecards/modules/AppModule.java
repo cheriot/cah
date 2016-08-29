@@ -2,6 +2,7 @@ package com.cheriot.horriblecards.modules;
 
 import android.app.Application;
 
+import com.cheriot.horriblecards.InitializeUserProfileAuthListener;
 import com.cheriot.horriblecards.models.AuthService;
 import com.cheriot.horriblecards.models.Dealer;
 import com.cheriot.horriblecards.models.DealerService;
@@ -39,7 +40,9 @@ public class AppModule {
     @Provides
     @Singleton
     AuthService providesAuthService(FirebaseAuth firebaseAuth) {
-        return new AuthService(firebaseAuth);
+        AuthService authService = new AuthService(firebaseAuth);
+        authService.addAuthStateListener(new InitializeUserProfileAuthListener());
+        return authService;
     }
 
     @Provides
