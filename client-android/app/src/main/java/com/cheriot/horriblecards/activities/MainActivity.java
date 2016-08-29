@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements ChooseGameView, A
 
         mChooseGamePresenter.setChooseGameView(this);
         mJoinGameCode.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
-        mJoinGameCode.setImeActionLabel("Join", KeyEvent.KEYCODE_ENTER);
         mJoinGameCode.setImeOptions(EditorInfo.IME_ACTION_DONE);
         mJoinGameCode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
