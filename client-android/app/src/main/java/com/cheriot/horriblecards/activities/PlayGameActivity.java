@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cheriot.horriblecards.App;
 import com.cheriot.horriblecards.R;
@@ -55,6 +55,6 @@ public class PlayGameActivity extends AppCompatActivity implements PlayGameView 
 
     @Override
     public void displayError(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG);
+        Snackbar.make(mJoinGameCode, msg, Snackbar.LENGTH_LONG).show();
     }
 }

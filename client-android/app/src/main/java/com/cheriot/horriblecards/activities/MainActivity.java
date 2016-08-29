@@ -2,6 +2,7 @@ package com.cheriot.horriblecards.activities;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputFilter;
 import android.view.KeyEvent;
@@ -10,7 +11,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cheriot.horriblecards.App;
 import com.cheriot.horriblecards.R;
@@ -82,8 +82,7 @@ public class MainActivity extends AppCompatActivity implements ChooseGameView, A
 
     @Override
     public void displayError(String msg) {
-        // TODO: Add design lib and use Snackbar.
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        Snackbar.make(mNewGameButton, msg, Snackbar.LENGTH_LONG).show();
     }
 
     @Override
