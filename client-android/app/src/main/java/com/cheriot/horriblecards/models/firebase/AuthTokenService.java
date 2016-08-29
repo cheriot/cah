@@ -25,22 +25,25 @@ public class AuthTokenService {
     private AuthService mAuthService;
     private FirebaseUser mFirebaseUser;
     private RuntimeException tokenRequestException;
+    private boolean issuedTokenRequest;
     private String token;
 
     @Inject
     public AuthTokenService(AuthService authService) {
         mAuthService = authService;
+        issuedTokenRequest = false;
 
         Timber.d("Registering AuthStateListener.");
         mAuthService.addAuthStateListener(new AuthStateListener() {
             @Override
             public void onSignedIn(FirebaseUser firebaseUser) {
-                setFirebaseUser(firebaseUser);
+                signIn(firebaseUser);
             }
 
             @Override
             public void onSignedOut() {
                 Timber.i("Signed out. Authenticated server access is blocked.");
+                signOut();
             }
         });
     }
@@ -61,6 +64,11 @@ public class AuthTokenService {
 
     private synchronized void requestToken() {
         Timber.d("getToken request");
+
+        // The Firebase library becomes finicky when multiple tokens are requested.
+        if(issuedTokenRequest) return;
+        issuedTokenRequest = true;
+
         final Object lock = this;
         mFirebaseUser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
             @Override
@@ -69,19 +77,26 @@ public class AuthTokenService {
                     Timber.d("getToken result %s", task.getResult().getToken());
                     token = task.getResult().getToken();
                     synchronized (lock) {
-                        lock.notifyAll();
+                        lock.notifyAll(); // ** NOTIFY **
                     }
                 } else {
                     Timber.e(task.getException(), "Error: requestToken failed.");
                     tokenRequestException = new RuntimeException("requestToken failed.", task.getException());
                 }
+                issuedTokenRequest = false;
             }
         });
     }
 
-    private synchronized void setFirebaseUser(FirebaseUser firebaseUser) {
+    private synchronized void signIn(FirebaseUser firebaseUser) {
         mFirebaseUser = firebaseUser;
         tokenRequestException = null;
         requestToken();
+    }
+
+    private synchronized void signOut() {
+        mFirebaseUser = null;
+        tokenRequestException = null;
+        issuedTokenRequest = false;
     }
 }
