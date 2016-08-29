@@ -7,7 +7,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,6 @@ public class AuthService {
     AuthStateChangeListener mAuthListener;
     List<AuthStateListener> mAuthStateListeners;
     FirebaseUser mFirebaseUser;
-    String mFirebaseToken;
 
     public AuthService(FirebaseAuth auth) {
         Timber.d("construct");
@@ -41,42 +39,29 @@ public class AuthService {
                 signInAnonymously();
             }
         };
-
     }
 
     public boolean isAuthenticated() {
-        return mFirebaseUser != null && mFirebaseToken != null;
+        return mFirebaseUser != null;
     }
 
     private void setSignedIn(FirebaseUser firebaseUser) {
         mFirebaseUser = firebaseUser;
         Timber.d("setSignedIn %s", firebaseUser.getUid());
-        getToken(new TaskResultListener<String>() {
-            @Override
-            public void onSuccess(String result) {
-                mFirebaseToken = result;
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Timber.e(e, "Error getting firebase token.");
-            }
-        });
         for(AuthStateListener listener : mAuthStateListeners) {
-            listener.onSignedIn();
+            listener.onSignedIn(mFirebaseUser);
         }
     }
 
     private void setSignedOut() {
         mFirebaseUser = null;
-        mFirebaseToken = null;
         for(AuthStateListener listener : mAuthStateListeners) {
             listener.onSignedOut();
         }
     }
 
     public void addAuthStateListener(AuthStateListener listener) {
-        if(isAuthenticated()) listener.onSignedIn();
+        if(isAuthenticated()) listener.onSignedIn(mFirebaseUser);
         else listener.onSignedOut();
         mAuthStateListeners.add(listener);
     }
@@ -85,37 +70,12 @@ public class AuthService {
         mAuthStateListeners.remove(listener);
     }
 
-    private void getToken(final TaskResultListener<String> taskResultListener) {
-        Timber.d("getToken request");
-        mFirebaseUser.getToken(true).addOnCompleteListener(new OnCompleteListener<GetTokenResult>() {
-            @Override
-            public void onComplete(@NonNull Task<GetTokenResult> task) {
-                if(task.isSuccessful()) {
-                    Timber.d("getToken result %s", task.getResult().getToken());
-                    taskResultListener.onSuccess(task.getResult().getToken());
-                } else {
-                    taskResultListener.onError(task.getException());
-                }
-            }
-        });
-    }
-
     public String getUid() {
         return mFirebaseUser.getUid();
     }
 
-    public String getToken() {
-        return mFirebaseToken;
-    }
-
     public void start() {
         mAuth.addAuthStateListener(mAuthListener);
-    }
-
-    public void stop() {
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
-        }
     }
 
     public void signOut() {

@@ -5,6 +5,7 @@ import android.app.Application;
 import com.cheriot.horriblecards.models.AuthService;
 import com.cheriot.horriblecards.models.Dealer;
 import com.cheriot.horriblecards.models.DealerService;
+import com.cheriot.horriblecards.models.http.AuthInterceptor;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -13,6 +14,7 @@ import javax.inject.Singleton;
 
 import dagger.Module;
 import dagger.Provides;
+import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -48,11 +50,21 @@ public class AppModule {
 
     @Provides
     @Singleton
-    Dealer providesDealer() {
-        Retrofit retrofit = new Retrofit.Builder()
+    Retrofit providesRetrofit(AuthInterceptor authInterceptor) {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .addInterceptor(authInterceptor)
+                .build();
+
+        return new Retrofit.Builder()
                 .baseUrl("https://cards-against-humanity-14b7e.appspot.com/")
+                .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
+    }
+
+    @Provides
+    @Singleton
+    Dealer providesDealer(Retrofit retrofit) {
         return retrofit.create(Dealer.class);
     }
 

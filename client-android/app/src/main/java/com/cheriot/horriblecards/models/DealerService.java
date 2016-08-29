@@ -1,7 +1,5 @@
 package com.cheriot.horriblecards.models;
 
-import android.accounts.AuthenticatorException;
-
 import java.io.IOException;
 
 import javax.inject.Inject;
@@ -29,7 +27,7 @@ public class DealerService {
     }
 
     public void createGame(final TaskResultListener<String> listener) {
-        Call<GameIdentifier> call = mDealer.createGame(getToken(listener));
+        Call<GameIdentifier> call = mDealer.createGame();
         call.enqueue(new Callback<GameIdentifier>() {
 
             @Override
@@ -52,11 +50,13 @@ public class DealerService {
     }
 
     public void joinGame(String inviteCode, final TaskResultListener<String> listener) {
-        Call<GameIdentifier> call = mDealer.createGame(getToken(listener));
+        Timber.d("joinGame request %s.", inviteCode);
+        Call<GameIdentifier> call = mDealer.joinGame(inviteCode);
         call.enqueue(new Callback<GameIdentifier>() {
             @Override
             public void onResponse(Call<GameIdentifier> call, Response<GameIdentifier> response) {
                 if(response.isSuccessful()) {
+                    Timber.d("joinGame response %s", response.raw().body().toString());
                     listener.onSuccess(response.body().getGameKey());
                 } else {
                     logErrorResponse("joinGame", response);
@@ -69,12 +69,6 @@ public class DealerService {
 
             }
         });
-    }
-
-    private String getToken(TaskResultListener listener) {
-        String token = mAuthService.getToken();
-        if(token == null) listener.onError(new AuthenticatorException("Not authenticated."));
-        return token;
     }
 
     private static void logErrorResponse(String msg, Response response) {

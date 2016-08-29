@@ -23,8 +23,9 @@ public class FirebaseGame {
         mRef = ref;
     }
 
-    public void fetchGameCode(String gameId, final TaskResultListener<String> listener) {
-       mRef.child("/games/"+gameId+"/gameCode")
+    public void fetchGameCode(String gameKey, final TaskResultListener<String> listener) {
+        Timber.d("Find game code for gameKey %s", gameKey);
+       mRef.child("/games/"+gameKey+"/gameCode")
                .addListenerForSingleValueEvent(new ValueEventListener() {
            @Override
            public void onDataChange(DataSnapshot dataSnapshot) {

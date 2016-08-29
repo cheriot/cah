@@ -51,7 +51,7 @@ public class ChooseGamePresenter {
 
             @Override
             public void onError(Exception e) {
-                getChooseGameView().displayError("Error join game.");
+                getChooseGameView().displayError("Error joining game.");
             }
         });
     }

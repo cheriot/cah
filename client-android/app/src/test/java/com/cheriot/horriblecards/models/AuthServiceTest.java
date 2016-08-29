@@ -1,10 +1,7 @@
 package com.cheriot.horriblecards.models;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GetTokenResult;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,24 +47,10 @@ public class AuthServiceTest {
         when(mFirebaseAuth.getCurrentUser()).thenReturn(mFirebaseUser);
         when(mFirebaseUser.getUid()).thenReturn(uid);
 
-        // Now verify that on login we fetch the token. Grab the listener for that async call.
-        Task mockGetTokenTask = mock(Task.class);
-        when(mFirebaseUser.getToken(anyBoolean())).thenReturn(mockGetTokenTask);
-
+        // Firebase will call our listener.
         authStateListener.onAuthStateChanged(mFirebaseAuth);
 
-        // When the token becomes available, we're logged in.
-        String token = "fake-token";
-        ArgumentCaptor<OnCompleteListener> getTokenListenerArgCapture = ArgumentCaptor.forClass(OnCompleteListener.class);
-        verify(mockGetTokenTask).addOnCompleteListener(getTokenListenerArgCapture.capture());
-        when(mockGetTokenTask.isSuccessful()).thenReturn(true);
-        GetTokenResult mockGetTokenResult = mock(GetTokenResult.class);
-        when(mockGetTokenResult.getToken()).thenReturn(token);
-        when(mockGetTokenTask.getResult()).thenReturn(mockGetTokenResult);
-        getTokenListenerArgCapture.getValue().onComplete(mockGetTokenTask);
-
         assertEquals("Returns uid.", uid, mAuthService.getUid());
-        assertNotNull("Has token.", mAuthService.getToken());
         assertTrue("Is signed in.", mAuthService.isAuthenticated());
     }
 
@@ -75,12 +58,11 @@ public class AuthServiceTest {
     public void testAddAuthStateListener_signedIn() {
         // Set signed in without mocking the firebase api.
         mAuthService.mFirebaseUser = mFirebaseUser;
-        mAuthService.mFirebaseToken = "fake-token";
 
         AuthStateListener mockAuthStateListener = mock(AuthStateListener.class);
         mAuthService.addAuthStateListener(mockAuthStateListener);
         // Immediately tell the listener that the current state is signed in.
-        verify(mockAuthStateListener).onSignedIn();
+        verify(mockAuthStateListener).onSignedIn(mFirebaseUser);
     }
 
     @Test

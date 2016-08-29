@@ -49,9 +49,7 @@ public class DealerUnitTest {
                 .setBody("{\"gameKey\": \"mock-game-key\"}");
         server.enqueue(mockResponse);
 
-        String userId = "fake-user-id";
-        String token = "fake-token";
-        Call<GameIdentifier> call = dealer.createGame(token);
+        Call<GameIdentifier> call = dealer.createGame();
         Response<GameIdentifier> response = call.execute();
         assertEquals("200", 200, response.code());
         assertEquals("Received gameKey.", "mock-game-key", response.body().getGameKey());
@@ -59,7 +57,6 @@ public class DealerUnitTest {
         RecordedRequest request = server.takeRequest();
         assertEquals("Request POST.", "POST", request.getMethod());
         assertEquals("Request path.", "/api/v1/games", request.getPath());
-        assertEquals("Request includes token.", token, request.getHeader(Dealer.AUTH_HEADER));
     }
 
     @Test

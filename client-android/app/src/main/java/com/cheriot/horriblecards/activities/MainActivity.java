@@ -16,6 +16,7 @@ import com.cheriot.horriblecards.App;
 import com.cheriot.horriblecards.R;
 import com.cheriot.horriblecards.models.AuthStateListener;
 import com.cheriot.horriblecards.presenters.ChooseGamePresenter;
+import com.google.firebase.auth.FirebaseUser;
 
 import javax.inject.Inject;
 
@@ -69,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements ChooseGameView, A
     }
 
     @Override
-    public void onSignedIn() {
+    public void onSignedIn(FirebaseUser firebaseUser) {
         Timber.d("Allow game creation.");
         mNewGameButton.setEnabled(true);
     }
@@ -81,7 +82,8 @@ public class MainActivity extends AppCompatActivity implements ChooseGameView, A
 
     @Override
     public void displayError(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG);
+        // TODO: Add design lib and use Snackbar.
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
     @Override

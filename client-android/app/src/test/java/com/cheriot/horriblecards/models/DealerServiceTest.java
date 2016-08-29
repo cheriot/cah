@@ -32,11 +32,9 @@ public class DealerServiceTest {
 
     @Test
     public void createGame_success() {
-        String token = "fakeToken";
-        when(mAuthService.getToken()).thenReturn(token);
 
         final Call<GameIdentifier> mockCall = mock(Call.class);
-        when(mMockDealer.createGame(anyString())).thenAnswer(new Answer<Call>() {
+        when(mMockDealer.createGame()).thenAnswer(new Answer<Call>() {
             @Override
             public Call answer(InvocationOnMock invocation) throws Throwable {
                 return mockCall;
@@ -45,7 +43,7 @@ public class DealerServiceTest {
 
         mDealerService.createGame(mMockTaskResultListener);
 
-        verify(mMockDealer).createGame(token);
+        verify(mMockDealer).createGame();
         ArgumentCaptor<Callback> callbackCaptor = ArgumentCaptor.forClass(Callback.class);
         verify(mockCall).enqueue(callbackCaptor.capture());
 
