@@ -16,7 +16,6 @@ import timber.log.Timber;
 public class ChooseGamePresenter {
 
     @Inject DealerService mDealerService;
-    @Inject FirebaseGame mFirebaseGame;
     @Inject AuthService mAuthService;
 
     ChooseGameView chooseGameView;
@@ -24,7 +23,6 @@ public class ChooseGamePresenter {
     @Inject
     public ChooseGamePresenter(DealerService dealerService, FirebaseGame firebaseGame, AuthService authService) {
         mDealerService = dealerService;
-        mFirebaseGame = firebaseGame;
         mAuthService = authService;
     }
 
@@ -33,26 +31,12 @@ public class ChooseGamePresenter {
             @Override
             public void onSuccess(String gameId) {
                 Timber.d("Have game id %s.", gameId);
-                findGame(gameId);
+                getChooseGameView().startGame(gameId);
             }
 
             @Override
             public void onError(Exception e) {
                 getChooseGameView().displayError("Error creating a new Game.");
-            }
-        });
-    }
-
-    private void findGame(String gameId) {
-        mFirebaseGame.fetchGameCode(gameId, new TaskResultListener<String>() {
-            @Override
-            public void onSuccess(String gameCode) {
-                getChooseGameView().startGame(gameCode);
-            }
-
-            @Override
-            public void onError(Exception e) {
-                getChooseGameView().displayError("Error accessing game.");
             }
         });
     }

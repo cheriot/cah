@@ -28,6 +28,7 @@ import timber.log.Timber;
  */
 public class MainActivity extends AppCompatActivity implements ChooseGameView, AuthStateListener {
 
+    // This needs to be in a loader.
     @Inject ChooseGamePresenter mChooseGamePresenter;
 
     @BindView(R.id.game_link) TextView mGameLink;

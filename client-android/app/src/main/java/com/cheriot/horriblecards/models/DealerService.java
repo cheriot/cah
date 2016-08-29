@@ -73,7 +73,7 @@ public class DealerService {
 
     private String getToken(TaskResultListener listener) {
         String token = mAuthService.getToken();
-        if(token.isEmpty()) listener.onError(new AuthenticatorException("Not authenticated."));
+        if(token == null) listener.onError(new AuthenticatorException("Not authenticated."));
         return token;
     }
 
