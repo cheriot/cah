@@ -25,7 +25,7 @@ router.get('/', function foo(req, res) {
 router.route('/games')
   .post(function(req, res) {
     games
-      .create(res.locals.uid)
+      .create(res.locals.currentUser)
       .then((game) => res.json(game) );
   });
 
@@ -33,7 +33,7 @@ router.route('/games/join')
   .post(function(req, res) {
     const gameCode = requireBody(req, 'gameCode');
     games
-      .join(res.locals.uid, gameCode)
+      .join(res.locals.currentUser, gameCode)
       .then((result) => {
         if(result.error) {
           res.status(404).json(result);

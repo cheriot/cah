@@ -15,14 +15,16 @@ function requireAuth(req, res, next) {
     return;
   }
 
-  firebase.auth().verifyIdToken(token).then(function(decodedToken) {
-    res.locals.uid = decodedToken.uid;
-    next();
-  }).catch(function(err) {
-    const msg = 'Error authenticating: ' + err;
-    console.error(msg + ' Token of length ' + token.length + ' ' + token);
-    next(authError(msg));
-  });
+  firebase.auth()
+    .verifyIdToken(token)
+    .then(function(decodedToken) {
+      res.locals.currentUser = decodedToken;
+      next();
+    }).catch(function(err) {
+      const msg = 'Error authenticating: ' + err;
+      console.error(msg + ' Token of length ' + token.length + ' ' + token);
+      next(authError(msg));
+    });
 }
 
 function currentUser() {

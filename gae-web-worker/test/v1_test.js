@@ -52,7 +52,7 @@ describe('http resources', function() {
         // If the test set an empty uid, reject.
         if(_.isEmpty(uid)) return Promise.reject(new Error('Fake rejection.'));
         // If the test set a uid, resolve.
-        else return Promise.resolve({uid: uid});
+        else return Promise.resolve({name: 'Fake Name', uid: uid});
       }
     });
     require('../models/auth').currentUser = function mockCurrentUser() {

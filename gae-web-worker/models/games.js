@@ -34,15 +34,15 @@ function fetchGameId() {
     .then((transactionResult) => transactionResult.snapshot.val());
 }
 
-function createGame(uid, gameCode) {
+function createGame(currentUser, gameCode) {
   assert(gameCode, 'Valid gameCode required.');
 
   return firebase.ref('games').push({
     version: 1,
     gameCode: gameCode,
     players: {
-      [uid]: {
-        displayName: auth.currentUser().displayName,
+      [currentUser.uid]: {
+        displayName: currentUser.name,
         // The client will set to true after registering
         // an onDisconnect callback.
         connected: false
@@ -50,7 +50,7 @@ function createGame(uid, gameCode) {
     },
     // Time since the unix epock in ms.
     createdAt: firebase.timestamp,
-    createdBy: uid
+    createdBy: currentUser.uid
   });
 }
 
@@ -74,30 +74,28 @@ function findGameByCode(gameCode) {
     });
 }
 
-module.exports.create = (uid) => {
-  assert(uid, 'Valid uid required.');
-
+module.exports.create = (currentUser) => {
   return fetchGameId()
     .then((gameKey) => id_conceal.encode(gameKey))
-    .then((gameCode) => createGame(uid, gameCode))
+    .then((gameCode) => createGame(currentUser, gameCode))
     // #then will make sure the write finishes before sending a response.
     .then((gameRef) => gameRef.once('value'))
     .then((snap) => {
       return { gameKey: snap.key, gameCode: snap.val().gameCode };
     })
-    .catch((err) => throw err);
+    .catch((err) => {throw err});
 }
 
-module.exports.join = (uid, gameCode) => {
+module.exports.join = (currentUser, gameCode) => {
   return findGameByCode(gameCode)
     .then((game) => {
       console.error('now add to players', game);
       return firebase
-        .ref('games/'+game.gameKey+'/players/'+uid)
+        .ref('games/'+game.gameKey+'/players/'+currentUser.uid)
         .set(true)
         .then(() => _.pick(game, ['gameKey', 'gameCode']));
     })
-    .catch((err) => throw err);
+    .catch((err) => {throw err});
 }
 
 /*
