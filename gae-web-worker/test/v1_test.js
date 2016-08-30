@@ -55,6 +55,13 @@ describe('http resources', function() {
         else return Promise.resolve({uid: uid});
       }
     });
+    require('../models/auth').currentUser = function mockCurrentUser() {
+      if(uid) {
+        return {displayName: 'Fake Name', uid: uid};
+      } else {
+        throw new Error('Fake authentication required error.');
+      }
+    }
     app = require('../app');
   })
 

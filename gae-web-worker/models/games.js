@@ -1,6 +1,7 @@
 'use strict';
 
 const firebase = require('./firebase'),
+  auth = require('./auth'),
   assert = require('assert'),
   id_conceal = require('./id_conceal'),
   _ = require('lodash');
@@ -8,8 +9,18 @@ const firebase = require('./firebase'),
 function fetchGameId() {
   function incrementSequence (current) {
     if(current) return current+1;
-    else return 10000;
+    else return 1024; // 32*32 so we'll start with at least three digits.
   }
+
+  // Right now, if a code is reissued, we can't query in a way that
+  // will find the most recent one. Change to use the following structure
+  // so that the sequence can be reset without issue.
+  // inviteCodes: {
+  //   sequence: number,
+  //   codeGames: {
+  //     [code]: [gameKey]
+  //   }
+  // }
 
   return firebase.ref('gameSequence')
     .transaction(incrementSequence, (error, committed, snapshot) => {
@@ -27,8 +38,16 @@ function createGame(uid, gameCode) {
   assert(gameCode, 'Valid gameCode required.');
 
   return firebase.ref('games').push({
+    version: 1,
     gameCode: gameCode,
-    players: {[uid]: true},
+    players: {
+      [uid]: {
+        displayName: auth.currentUser().displayName,
+        // The client will set to true after registering
+        // an onDisconnect callback.
+        connected: false
+      }
+    },
     // Time since the unix epock in ms.
     createdAt: firebase.timestamp,
     createdBy: uid
