@@ -5,5 +5,5 @@ package com.cheriot.horriblecards.models;
  */
 public interface TaskResultListener<T> {
     void onSuccess(T result);
-    void onError(Exception e);
+    void onError(Throwable e);
 }

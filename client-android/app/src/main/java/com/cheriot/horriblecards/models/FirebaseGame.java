@@ -18,14 +18,22 @@ public class FirebaseGame {
 
     @Inject DatabaseReference mRef;
 
+    private String mGameKey;
+    private DatabaseReference mGameRef;
+
     @Inject
     public FirebaseGame(DatabaseReference ref) {
         mRef = ref;
     }
 
-    public void fetchGameCode(String gameKey, final TaskResultListener<String> listener) {
+    public void subscribeToGame(String gameKey) {
         Timber.d("Find game code for gameKey %s", gameKey);
-       mRef.child("/games/"+gameKey+"/gameCode")
+        mGameKey = gameKey;
+        mGameRef = mRef.child("/games/" + gameKey);
+    }
+
+    public void gameCode(final TaskResultListener<String> listener) {
+        mGameRef.child("/gameCode")
                .addListenerForSingleValueEvent(new ValueEventListener() {
            @Override
            public void onDataChange(DataSnapshot dataSnapshot) {
@@ -39,6 +47,10 @@ public class FirebaseGame {
                listener.onError(databaseError.toException());
            }
        });
+    }
+
+    public DatabaseReference players() {
+        return mGameRef.child("players");
     }
 
 }

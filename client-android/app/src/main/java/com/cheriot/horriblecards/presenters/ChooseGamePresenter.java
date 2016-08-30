@@ -35,8 +35,8 @@ public class ChooseGamePresenter {
             }
 
             @Override
-            public void onError(Exception e) {
-                getChooseGameView().displayError("Error creating a new Game.");
+            public void onError(Throwable e) {
+                getChooseGameView().displayError("Error creating a new game.");
             }
         });
     }
@@ -50,7 +50,7 @@ public class ChooseGamePresenter {
             }
 
             @Override
-            public void onError(Exception e) {
+            public void onError(Throwable e) {
                 getChooseGameView().displayError("Error joining game.");
             }
         });

@@ -45,6 +45,7 @@ public class DealerService {
             public void onFailure(Call<GameIdentifier> call, Throwable t) {
                 // Failures that are not responses from the server.
                 Timber.e(t, "Failed to start game.");
+                listener.onError(t);
             }
         });
     }

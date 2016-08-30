@@ -11,4 +11,11 @@
         android:layout_gravity="center_horizontal"
         android:text="60sp"
         android:textColor="@color/colorAccent"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/players_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </android.support.v7.widget.RecyclerView>
 </LinearLayout>
