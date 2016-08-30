@@ -84,7 +84,8 @@ module.exports.create = (uid) => {
     .then((gameRef) => gameRef.once('value'))
     .then((snap) => {
       return { gameKey: snap.key, gameCode: snap.val().gameCode };
-    });
+    })
+    .catch((err) => throw err);
 }
 
 module.exports.join = (uid, gameCode) => {
@@ -95,7 +96,8 @@ module.exports.join = (uid, gameCode) => {
         .ref('games/'+game.gameKey+'/players/'+uid)
         .set(true)
         .then(() => _.pick(game, ['gameKey', 'gameCode']));
-    });
+    })
+    .catch((err) => throw err);
 }
 
 /*
