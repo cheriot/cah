@@ -34,6 +34,15 @@ function fetchGameId() {
     .then((transactionResult) => transactionResult.snapshot.val());
 }
 
+function playersValue(currentUser) {
+  return {
+    displayName: currentUser.name,
+    // The client will set to true after registering
+    // an onDisconnect callback.
+    connected: false
+  };
+}
+
 function createGame(currentUser, gameCode) {
   assert(gameCode, 'Valid gameCode required.');
 
@@ -41,12 +50,7 @@ function createGame(currentUser, gameCode) {
     version: 1,
     gameCode: gameCode,
     players: {
-      [currentUser.uid]: {
-        displayName: currentUser.name,
-        // The client will set to true after registering
-        // an onDisconnect callback.
-        connected: false
-      }
+      [currentUser.uid]: playersValue(currentUser)
     },
     // Time since the unix epock in ms.
     createdAt: firebase.timestamp,
@@ -92,7 +96,7 @@ module.exports.join = (currentUser, gameCode) => {
       console.error('now add to players', game);
       return firebase
         .ref('games/'+game.gameKey+'/players/'+currentUser.uid)
-        .set(true)
+        .set(playersValue(currentUser))
         .then(() => _.pick(game, ['gameKey', 'gameCode']));
     })
     .catch((err) => {throw err});
