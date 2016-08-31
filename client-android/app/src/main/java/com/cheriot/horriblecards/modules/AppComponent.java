@@ -17,4 +17,6 @@ public interface AppComponent {
 
     ActivityComponent newActivityComponent(ActivityModule activityModule);
 
+    GameComponent newGameComponent(GameModule gameModule);
+
 }

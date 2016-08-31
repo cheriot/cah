@@ -3,7 +3,6 @@ package com.cheriot.horriblecards.presenters;
 import com.cheriot.horriblecards.activities.ChooseGameView;
 import com.cheriot.horriblecards.models.AuthService;
 import com.cheriot.horriblecards.models.DealerService;
-import com.cheriot.horriblecards.models.FirebaseGame;
 import com.cheriot.horriblecards.models.TaskResultListener;
 
 import javax.inject.Inject;
@@ -15,13 +14,13 @@ import timber.log.Timber;
  */
 public class ChooseGamePresenter {
 
-    @Inject DealerService mDealerService;
-    @Inject AuthService mAuthService;
+    private DealerService mDealerService;
+    private AuthService mAuthService;
 
     ChooseGameView chooseGameView;
 
     @Inject
-    public ChooseGamePresenter(DealerService dealerService, FirebaseGame firebaseGame, AuthService authService) {
+    public ChooseGamePresenter(DealerService dealerService, AuthService authService) {
         mDealerService = dealerService;
         mAuthService = authService;
     }

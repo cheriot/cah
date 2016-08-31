@@ -1,35 +1,28 @@
 package com.cheriot.horriblecards.models;
 
+import com.cheriot.horriblecards.modules.GameScope;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
+import javax.inject.Named;
 
 import timber.log.Timber;
 
 /**
  * Created by cheriot on 8/27/16.
  */
-@Singleton
+@GameScope
 public class FirebaseGame {
 
-    @Inject DatabaseReference mRef;
-
-    private String mGameKey;
     private DatabaseReference mGameRef;
 
     @Inject
-    public FirebaseGame(DatabaseReference ref) {
-        mRef = ref;
-    }
-
-    public void subscribeToGame(String gameKey) {
-        Timber.d("Find game code for gameKey %s", gameKey);
-        mGameKey = gameKey;
-        mGameRef = mRef.child("/games/" + gameKey);
+    public FirebaseGame(DatabaseReference rootRef, @Named("gameKey") String gameKey) {
+        mGameRef = rootRef.child("/games/"+gameKey);
+        Timber.d("mGameRef %s %s.", rootRef, mGameRef.getKey());
     }
 
     public void gameCode(final TaskResultListener<String> listener) {
@@ -49,8 +42,7 @@ public class FirebaseGame {
        });
     }
 
-    public DatabaseReference players() {
-        return mGameRef.child("players");
+    public DatabaseReference getGameRef() {
+        return mGameRef;
     }
-
 }

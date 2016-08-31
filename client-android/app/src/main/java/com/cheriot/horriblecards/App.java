@@ -10,6 +10,7 @@ import com.cheriot.horriblecards.modules.ActivityModule;
 import com.cheriot.horriblecards.modules.AppComponent;
 import com.cheriot.horriblecards.modules.AppModule;
 import com.cheriot.horriblecards.modules.DaggerAppComponent;
+import com.google.firebase.database.DatabaseReference;
 
 import javax.inject.Inject;
 
@@ -24,6 +25,7 @@ public class App extends Application {
 
     private AppComponent appComponent;
     @Inject AuthService mAuthService;
+    @Inject DatabaseReference mRootRef;
 
     @Override
     public void onCreate() {

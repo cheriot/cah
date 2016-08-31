@@ -9,9 +9,9 @@ import dagger.Module;
  */
 @Module
 public class ActivityModule {
-    private Activity activity;
+    private Activity mActivity;
 
     public ActivityModule(Activity activity) {
-        this.activity = activity;
+        mActivity = activity;
     }
 }

@@ -2,11 +2,14 @@ package com.cheriot.horriblecards.modules;
 
 import android.app.Application;
 
+import com.cheriot.horriblecards.App;
 import com.cheriot.horriblecards.InitializeUserProfileAuthListener;
 import com.cheriot.horriblecards.models.AuthService;
 import com.cheriot.horriblecards.models.Dealer;
 import com.cheriot.horriblecards.models.DealerService;
+import com.cheriot.horriblecards.models.GameContainer;
 import com.cheriot.horriblecards.models.http.AuthInterceptor;
+import com.cheriot.horriblecards.presenters.PlayGamePresenter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -25,16 +28,16 @@ import retrofit2.converter.gson.GsonConverterFactory;
 @Module
 public class AppModule {
 
-    private Application mApplication;
+    private App mApp;
 
-    public AppModule(Application mApplication) {
-        this.mApplication = mApplication;
+    public AppModule(App mApp) {
+        this.mApp = mApp;
     }
 
     @Provides
     @Singleton
     Application providesApplication() {
-        return mApplication;
+        return mApp;
     }
 
     @Provides
@@ -81,5 +84,17 @@ public class AppModule {
     @Singleton
     public DatabaseReference providesDatabaseReference() {
         return FirebaseDatabase.getInstance().getReference();
+    }
+
+    @Provides
+    @Singleton
+    public GameContainer providesGameContainer(DatabaseReference rootRef) {
+        return new GameContainer(mApp.getAppComponent(), rootRef);
+    }
+
+    @Provides
+    @Singleton
+    public PlayGamePresenter providesGamePlayPresenter(GameContainer gameContainer) {
+        return new PlayGamePresenter(gameContainer);
     }
 }

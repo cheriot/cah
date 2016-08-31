@@ -2,9 +2,11 @@ package com.cheriot.horriblecards.presenters;
 
 import com.cheriot.horriblecards.R;
 import com.cheriot.horriblecards.activities.PlayGameView;
+import com.cheriot.horriblecards.models.GameContainer;
 import com.cheriot.horriblecards.models.FirebaseGame;
 import com.cheriot.horriblecards.models.Player;
 import com.cheriot.horriblecards.models.TaskResultListener;
+import com.cheriot.horriblecards.models.firebase.FirebaseGamePlayers;
 import com.cheriot.horriblecards.recycler.PlayerViewHolder;
 import com.cheriot.horriblecards.recycler.PlayersRecyclerAdapter;
 
@@ -16,16 +18,17 @@ import javax.inject.Inject;
 public class PlayGamePresenter {
 
     private PlayGameView mPlayGameView;
-    private FirebaseGame mFirebaseGame;
+    private GameContainer mGameContainer;
+    @Inject FirebaseGame mGame;
+    @Inject FirebaseGamePlayers mGamePlayers;
 
-    @Inject
-    public PlayGamePresenter(FirebaseGame mFirebaseGame) {
-        this.mFirebaseGame = mFirebaseGame;
+    public PlayGamePresenter(GameContainer gameContainer) {
+        mGameContainer = gameContainer;
     }
 
     public void startPlaying(String gameKey) {
-        mFirebaseGame.subscribeToGame(gameKey);
-        mFirebaseGame.gameCode(new TaskResultListener<String>() {
+        mGameContainer.playGame(gameKey).inject(this);
+        mGame.gameCode(new TaskResultListener<String>() {
             @Override
             public void onSuccess(String gameCode) {
                 getPlayGameView().displayGameCode(gameCode);
@@ -44,7 +47,7 @@ public class PlayGamePresenter {
                 Player.class,
                 R.layout.list_item_player,
                 PlayerViewHolder.class,
-                mFirebaseGame.players());
+                mGamePlayers.getPlayersRef());
     }
 
     private PlayGameView getPlayGameView() {
