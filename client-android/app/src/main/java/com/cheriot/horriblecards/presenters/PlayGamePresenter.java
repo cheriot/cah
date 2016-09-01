@@ -6,7 +6,7 @@ import com.cheriot.horriblecards.models.GameContainer;
 import com.cheriot.horriblecards.models.FirebaseGame;
 import com.cheriot.horriblecards.models.Player;
 import com.cheriot.horriblecards.models.TaskResultListener;
-import com.cheriot.horriblecards.models.firebase.FirebaseGamePlayers;
+import com.cheriot.horriblecards.models.firebase.FirebasePlayers;
 import com.cheriot.horriblecards.recycler.PlayerViewHolder;
 import com.cheriot.horriblecards.recycler.PlayersRecyclerAdapter;
 
@@ -20,7 +20,7 @@ public class PlayGamePresenter {
     private PlayGameView mPlayGameView;
     private GameContainer mGameContainer;
     @Inject FirebaseGame mGame;
-    @Inject FirebaseGamePlayers mGamePlayers;
+    @Inject FirebasePlayers mGamePlayers;
 
     public PlayGamePresenter(GameContainer gameContainer) {
         mGameContainer = gameContainer;
@@ -28,6 +28,8 @@ public class PlayGamePresenter {
 
     public void startPlaying(String gameKey) {
         mGameContainer.playGame(gameKey).inject(this);
+        mGamePlayers.setConnected();
+
         mGame.gameCode(new TaskResultListener<String>() {
             @Override
             public void onSuccess(String gameCode) {

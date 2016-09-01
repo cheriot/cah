@@ -14,25 +14,38 @@ import timber.log.Timber;
  */
 public class GameContainer {
 
-    private AppComponent mAppComponent;
-    private DatabaseReference mRootRef;
+    private final AppComponent mAppComponent;
+    private final DatabaseReference mRootRef;
+    private final AuthService mAuthService;
 
     private String mGameKey;
     private GameComponent mGameComponent;
 
     @Inject
-    public GameContainer(AppComponent appComponent, DatabaseReference rootRef) {
+    public GameContainer(AppComponent appComponent, DatabaseReference rootRef, AuthService authService) {
         mAppComponent = appComponent;
         mRootRef = rootRef;
+        mAuthService = authService;
     }
 
     public GameComponent playGame(String gameKey) {
         if(!gameKey.equals(mGameKey)) {
-            mGameKey = gameKey;
-            mGameComponent = mAppComponent.newGameComponent(new GameModule(mRootRef, mGameKey));
+            startGame(gameKey);
         }
         Timber.d("playGame %s.", gameKey);
         return mGameComponent;
+    }
+
+    private void startGame(String gameKey) {
+        Timber.d("startGame %s.", gameKey);
+        mGameKey = gameKey;
+        try {
+            String uid = mAuthService.requireUid();
+            mGameComponent = mAppComponent.newGameComponent(new GameModule(mRootRef, mGameKey, uid));
+        } catch(AuthService.UnauthenticatedException ua) {
+            Timber.e(ua, "Unable to start the game without an authenticated user.");
+        }
+
     }
 
 }

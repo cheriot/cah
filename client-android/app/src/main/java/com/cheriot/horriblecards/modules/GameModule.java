@@ -1,7 +1,7 @@
 package com.cheriot.horriblecards.modules;
 
 import com.cheriot.horriblecards.models.FirebaseGame;
-import com.cheriot.horriblecards.models.firebase.FirebaseGamePlayers;
+import com.cheriot.horriblecards.models.firebase.FirebasePlayers;
 import com.google.firebase.database.DatabaseReference;
 
 import javax.inject.Named;
@@ -15,12 +15,14 @@ import dagger.Provides;
 @Module
 public class GameModule {
 
-    private DatabaseReference mRootRef;
-    private String mGameKey;
+    private final DatabaseReference mRootRef;
+    private final String mGameKey;
+    private final String mUid;
 
-    public GameModule(DatabaseReference rootRef, String gameKey) {
+    public GameModule(DatabaseReference rootRef, String gameKey, String uid) {
         mRootRef = rootRef;
         mGameKey = gameKey;
+        mUid = uid;
     }
 
     @Provides
@@ -32,7 +34,15 @@ public class GameModule {
 
     @Provides
     @GameScope
-    public FirebaseGamePlayers providesGamePlayers(FirebaseGame firebaseGame) {
-        return new FirebaseGamePlayers(firebaseGame.getGameRef());
+    @Named("uid")
+    public String providesUid() {
+        return mUid;
+    }
+
+
+        @Provides
+    @GameScope
+    public FirebasePlayers providesGamePlayers(FirebaseGame firebaseGame) {
+        return new FirebasePlayers(firebaseGame.getGameRef(), mUid);
     }
 }

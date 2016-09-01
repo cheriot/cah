@@ -88,8 +88,8 @@ public class AppModule {
 
     @Provides
     @Singleton
-    public GameContainer providesGameContainer(DatabaseReference rootRef) {
-        return new GameContainer(mApp.getAppComponent(), rootRef);
+    public GameContainer providesGameContainer(DatabaseReference rootRef, AuthService authService) {
+        return new GameContainer(mApp.getAppComponent(), rootRef, authService);
     }
 
     @Provides

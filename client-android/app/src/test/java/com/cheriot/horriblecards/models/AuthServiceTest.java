@@ -33,7 +33,7 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void testStart_success() {
+    public void testStart_success() throws Exception {
         mAuthService.start();
         // The firebase api is a terrible thing to mock.
 
@@ -50,7 +50,7 @@ public class AuthServiceTest {
         // Firebase will call our listener.
         authStateListener.onAuthStateChanged(mFirebaseAuth);
 
-        assertEquals("Returns uid.", uid, mAuthService.getUid());
+        assertEquals("Returns uid.", uid, mAuthService.requireUid());
         assertTrue("Is signed in.", mAuthService.isAuthenticated());
     }
 

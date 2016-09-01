@@ -45,7 +45,7 @@ public class AuthService {
         return mFirebaseUser != null;
     }
 
-    private void setSignedIn(FirebaseUser firebaseUser) {
+    private synchronized void setSignedIn(FirebaseUser firebaseUser) {
         mFirebaseUser = firebaseUser;
         Timber.d("setSignedIn %s", firebaseUser.getUid());
         for(AuthStateListener listener : mAuthStateListeners) {
@@ -53,7 +53,7 @@ public class AuthService {
         }
     }
 
-    private void setSignedOut() {
+    private synchronized void setSignedOut() {
         mFirebaseUser = null;
         for(AuthStateListener listener : mAuthStateListeners) {
             listener.onSignedOut();
@@ -70,7 +70,10 @@ public class AuthService {
         mAuthStateListeners.remove(listener);
     }
 
-    public String getUid() {
+    public synchronized String requireUid() throws UnauthenticatedException {
+        if(mFirebaseUser == null || mFirebaseUser.getUid() == null) {
+            throw new UnauthenticatedException();
+        }
         return mFirebaseUser.getUid();
     }
 
@@ -94,5 +97,11 @@ public class AuthService {
                         }
                     }
                 });
+    }
+
+    public class UnauthenticatedException extends Exception {
+        public UnauthenticatedException() {
+            super("The user is no longer authenticated.");
+        }
     }
 }
