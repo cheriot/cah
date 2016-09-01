@@ -6,4 +6,5 @@
 
     <color name="black_overlay">#66000000</color>
     <color name="black_text">#555</color>
+    <color name="gray_text">#aaa</color>
 </resources>

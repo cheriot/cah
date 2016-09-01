@@ -18,7 +18,6 @@ public class PlayerViewHolder extends RecyclerView.ViewHolder {
 
     private Player mPlayer;
     @BindView(R.id.player_display_name) TextView mDisplayNameText;
-    @BindView(R.id.player_connected) TextView mConnectedText;
 
     public PlayerViewHolder(View itemView) {
         super(itemView);
@@ -29,6 +28,10 @@ public class PlayerViewHolder extends RecyclerView.ViewHolder {
         Timber.d("setPlayer %s", player.getDisplayName());
         mPlayer = player;
         mDisplayNameText.setText(mPlayer.getDisplayName());
-        mConnectedText.setText(mPlayer.isConnected() ? "connected" : "disconnected");
+        if(mPlayer.isConnected()) {
+            mDisplayNameText.setTextColor(itemView.getResources().getColor(R.color.black_text));
+        } else {
+            mDisplayNameText.setTextColor(itemView.getResources().getColor(R.color.gray_text));
+        }
     }
 }
