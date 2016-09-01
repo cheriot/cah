@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements ChooseGameView, A
 
     @BindView(R.id.game_link) TextView mGameLink;
     @BindView(R.id.create_game_button) Button mNewGameButton;
-    @BindView(R.id.join_game_code) EditText mJoinGameCode;
+    @BindView(R.id.invite_code) EditText mInviteCodeEditText;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -45,13 +45,13 @@ public class MainActivity extends AppCompatActivity implements ChooseGameView, A
         ((App) getApplication()).newActivityComponent(this).inject(this);
 
         mChooseGamePresenter.setChooseGameView(this);
-        mJoinGameCode.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
-        mJoinGameCode.setImeOptions(EditorInfo.IME_ACTION_DONE);
-        mJoinGameCode.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mInviteCodeEditText.setFilters(new InputFilter[] {new InputFilter.AllCaps()});
+        mInviteCodeEditText.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        mInviteCodeEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if(actionId == EditorInfo.IME_ACTION_DONE) {
-                    joinGame(mJoinGameCode);
+                    joinGame(mInviteCodeEditText);
                 }
                 return false; // false so the Keyboard will close
             }
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements ChooseGameView, A
     }
 
     public void joinGame(View view) {
-        mChooseGamePresenter.joinGame(mJoinGameCode.getText().toString());
+        mChooseGamePresenter.joinGame(mInviteCodeEditText.getText().toString());
     }
 
     @Override

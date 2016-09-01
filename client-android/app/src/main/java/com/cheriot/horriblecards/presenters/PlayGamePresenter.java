@@ -30,11 +30,12 @@ public class PlayGamePresenter {
         mGameContainer.playGame(gameKey).inject(this);
         mGamePlayers.setConnected();
 
-        mGame.gameCode(new TaskResultListener<String>() {
+        getPlayGameView().displayPlayers(playersAdapter());
+
+        mGame.findInviteCode(new TaskResultListener<String>() {
             @Override
-            public void onSuccess(String gameCode) {
-                getPlayGameView().displayGameCode(gameCode);
-                getPlayGameView().displayPlayers(playersAdapter());
+            public void onSuccess(String inviteCode) {
+                getPlayGameView().displayInviteCode(inviteCode);
             }
 
             @Override

@@ -148,12 +148,12 @@ describe('http resources', function() {
           .then(expectJson({error: 'No credentials found.'}))
       });
 
-      it('accepts the gameCode and responds with the gameKey', function() {
+      it('accepts the inviteCode and responds with the gameKey', function() {
         this.timeout(5000); // Hitting a live firebase.
 
         // Create a game and then join it.
         uid = 'fake-user-id';
-        var gameKey, gameCode;
+        var gameKey, inviteCode;
         return chai.request(app)
           .post('/api/v1/games')
           .set('Authorization', 'fake-token')
@@ -161,19 +161,19 @@ describe('http resources', function() {
           .then((res) => {
             expect(res.body.gameKey).to.be.a('String')
             gameKey = res.body.gameKey;
-            gameCode = res.body.gameCode;
+            inviteCode = res.body.inviteCode;
           })
           .then(() => {
             uid = 'second-fake-user-id';
             return chai.request(app)
               .post('/api/v1/games/join')
               .set('Authorization', 'fake-token')
-              .send({gameCode: gameCode});
+              .send({inviteCode: inviteCode});
           })
           .then(expect200)
           .then((res) => {
             expect(res.body.gameKey).to.eq(gameKey);
-            expect(res.body.gameCode).to.eq(gameCode);
+            expect(res.body.inviteCode).to.eq(inviteCode);
           });
 
       });

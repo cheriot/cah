@@ -25,5 +25,5 @@ public interface Dealer {
     @FormUrlEncoded
     @POST(API_VERSION + "/games/join")
     @Headers("User-Agent: HorribleCards Android " + BuildConfig.VERSION_NAME)
-    Call<GameIdentifier> joinGame(@Field("gameCode") String gameCode);
+    Call<GameIdentifier> joinGame(@Field("inviteCode") String inviteCode);
 }

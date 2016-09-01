@@ -6,7 +6,7 @@ const firebase = require('./firebase'),
   id_conceal = require('./id_conceal'),
   _ = require('lodash');
 
-function fetchGameId() {
+function allocateGameId() {
   function incrementSequence (current) {
     if(current) return current+1;
     else return 1024; // 32*32 so we'll start with at least three digits.
@@ -43,12 +43,12 @@ function playersValue(currentUser) {
   };
 }
 
-function createGame(currentUser, gameCode) {
-  assert(gameCode, 'Valid gameCode required.');
+function createGame(currentUser, inviteCode) {
+  assert(inviteCode, 'Valid inviteCode required.');
 
   return firebase.ref('games').push({
     version: 1,
-    gameCode: gameCode,
+    inviteCode: inviteCode,
     players: {
       [currentUser.uid]: playersValue(currentUser)
     },
@@ -58,15 +58,15 @@ function createGame(currentUser, gameCode) {
   });
 }
 
-function findGameByCode(gameCode) {
+function findGameByCode(inviteCode) {
   return firebase.ref('games')
-    .orderByChild('gameCode')
-    .equalTo(gameCode)
+    .orderByChild('inviteCode')
+    .equalTo(inviteCode)
     .limitToLast(1)
     .once('value')
     .then((snapshot) => {
       const val = snapshot.val();
-      // val is { gameKey: {gameCode, createdAt, createdBy, ...}}
+      // val is { gameKey: {inviteCode, createdAt, createdBy, ...}}
       const gameKey = _.keys(val)[0];
       const game = val[gameKey];
       game.gameKey = gameKey;
@@ -79,25 +79,25 @@ function findGameByCode(gameCode) {
 }
 
 module.exports.create = (currentUser) => {
-  return fetchGameId()
-    .then((gameKey) => id_conceal.encode(gameKey))
-    .then((gameCode) => createGame(currentUser, gameCode))
+  return allocateGameId()
+    .then((gameId) => id_conceal.encode(gameId))
+    .then((inviteCode) => createGame(currentUser, inviteCode))
     // #then will make sure the write finishes before sending a response.
     .then((gameRef) => gameRef.once('value'))
     .then((snap) => {
-      return { gameKey: snap.key, gameCode: snap.val().gameCode };
+      return { gameKey: snap.key, inviteCode: snap.val().inviteCode };
     })
     .catch((err) => {throw err});
 }
 
-module.exports.join = (currentUser, gameCode) => {
-  return findGameByCode(gameCode)
+module.exports.join = (currentUser, inviteCode) => {
+  return findGameByCode(inviteCode)
     .then((game) => {
       console.error('now add to players', game);
       return firebase
         .ref('games/'+game.gameKey+'/players/'+currentUser.uid)
         .set(playersValue(currentUser))
-        .then(() => _.pick(game, ['gameKey', 'gameCode']));
+        .then(() => _.pick(game, ['gameKey', 'inviteCode']));
     })
     .catch((err) => {throw err});
 }

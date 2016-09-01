@@ -25,8 +25,8 @@ public class FirebaseGame {
         Timber.d("mGameRef %s %s.", rootRef, mGameRef.getKey());
     }
 
-    public void gameCode(final TaskResultListener<String> listener) {
-        mGameRef.child("/gameCode")
+    public void findInviteCode(final TaskResultListener<String> listener) {
+        mGameRef.child("/inviteCode")
                .addListenerForSingleValueEvent(new ValueEventListener() {
            @Override
            public void onDataChange(DataSnapshot dataSnapshot) {

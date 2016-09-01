@@ -31,9 +31,9 @@ router.route('/games')
 
 router.route('/games/join')
   .post(function(req, res) {
-    const gameCode = requireBody(req, 'gameCode');
+    const inviteCode = requireBody(req, 'inviteCode');
     games
-      .join(res.locals.currentUser, gameCode)
+      .join(res.locals.currentUser, inviteCode)
       .then((result) => {
         if(result.error) {
           res.status(404).json(result);

@@ -26,7 +26,7 @@ import butterknife.ButterKnife;
 public class PlayGameActivity extends AppCompatActivity implements PlayGameView {
 
     @Inject PlayGamePresenter mPlayGamePresenter;
-    @BindView(R.id.join_game_code) TextView mJoinGameCode;
+    @BindView(R.id.invite_code) TextView mInviteCodeText;
     @BindView(R.id.players_recycler) RecyclerView mPlayersRecyclerView;
 
     public static final String GAME_KEY_PARAM = "GAME_KEY_PARAM";
@@ -48,7 +48,7 @@ public class PlayGameActivity extends AppCompatActivity implements PlayGameView 
 
         Intent intent = getIntent();
         String gameKey = intent.getStringExtra(GAME_KEY_PARAM);
-        mJoinGameCode.setText(gameKey);
+        mInviteCodeText.setText(gameKey);
         mPlayGamePresenter.startPlaying(gameKey);
 
         mPlayersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -60,12 +60,12 @@ public class PlayGameActivity extends AppCompatActivity implements PlayGameView 
     }
 
     @Override
-    public void displayGameCode(String gameCode) {
-        mJoinGameCode.setText(gameCode);
+    public void displayInviteCode(String inviteCode) {
+        mInviteCodeText.setText(inviteCode);
     }
 
     @Override
     public void displayError(String msg) {
-        Snackbar.make(mJoinGameCode, msg, Snackbar.LENGTH_LONG).show();
+        Snackbar.make(mInviteCodeText, msg, Snackbar.LENGTH_LONG).show();
     }
 }
