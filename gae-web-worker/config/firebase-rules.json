@@ -1,0 +1,31 @@
+{
+  "rules": {
+    ".write": "false",
+
+    "games": {
+      "$gameKey": {
+        ".read": "data.child('players').hasChild(auth.uid)",
+        "players":{
+          "$uid": {
+            ".write": "auth.uid == $uid"
+          }
+        }
+      }
+    },
+
+    "integration": {
+
+      "games": {
+        "$gameKey": {
+          ".read": "data.child('players').hasChild(auth.uid)",
+          "players":{
+            "$uid": {
+              ".write": "auth.uid == $uid"
+            }
+          }
+        }
+      }
+
+    }
+  }
+}
