@@ -1,5 +1,23 @@
 'use strict';
 
+// games: {
+//   inviteCode
+//   createdAt
+//   createdBy
+//   players: {
+//     [playerKey]: {
+//       displayName
+//       connected
+//     }
+//   }
+//
+//   currentRound
+//   rounds: {
+//     [roundNumber]: {
+//       number
+//     }
+//   }
+
 const firebase = require('./firebase'),
   auth = require('./auth'),
   assert = require('assert'),
@@ -43,6 +61,11 @@ function playersValue(currentUser) {
   };
 }
 
+function gameRef(gameKey) {
+  if(!gameKey) throw 'Invalid gameKey '+gameKey;
+  return firebase.ref('games/'+gameKey);
+}
+
 function createGame(currentUser, inviteCode) {
   assert(inviteCode, 'Valid inviteCode required.');
 
@@ -56,6 +79,18 @@ function createGame(currentUser, inviteCode) {
     createdAt: firebase.timestamp,
     createdBy: currentUser.uid
   });
+}
+
+function findGameByKey(gameKey) {
+  return firebase.ref('games')
+    .orderByKey()
+    .equalTo(gameKey)
+    .once('value')
+    .then((snapshot) => {
+      if(!snapshot.exists()) throw new Error('No game found '+gameKey);
+      const game = snapshot.val()[gameKey];
+      return game;
+    });
 }
 
 function findGameByCode(inviteCode) {
@@ -93,58 +128,32 @@ module.exports.create = (currentUser) => {
 module.exports.join = (currentUser, inviteCode) => {
   return findGameByCode(inviteCode)
     .then((game) => {
-      console.error('now add to players', game);
-      return firebase
-        .ref('games/'+game.gameKey+'/players/'+currentUser.uid)
+      return gameRef(game.gameKey)
+        .child('players/'+currentUser.uid)
         .set(playersValue(currentUser))
         .then(() => _.pick(game, ['gameKey', 'inviteCode']));
     })
     .catch((err) => {throw err});
 }
 
-/*
- * Brainstorming data formats
-
- *  games: {
- *    .read: server-only
- *    .write: server-only
- *    [gameId]: {
- *      identifiers: {
- *        .read: games[gameId]players[auth.uid] exists
- *        shortCode: <value>
- *      }
- *      created: {
- *        .read: games[gameId]players[auth.uid] exists
- *        at: firebase.timestamp,
- *        uid: uid
- *      }
- *      players: {
- *        .read: games[gameId]players[auth.uid] exists
- *        [uid]: true
- *      }
- *      hands: {
- *        [uid]: {
- *          .read games[gameId]hands[auth.uid] is this one
- *          [cardId]: { copy of card }
- *        }
- *      }
- *    }
-
- *    OR
-
- *    [gameId]: {
- *      table: {
- *        .read players
- *        players:
- *        created:
- *        identifiers: {
- *          shortCode
- *        }
- *      }
- *      hand: {
- *        [uid]: {
- *          .read this player
- *        }
- *      }
-
-*/
+module.exports.start = (currentUser, gameKey) => {
+  return findGameByKey(gameKey)
+    .then((game) => {
+      // Only the person that created the game can start it. This gives people
+      // time to download or open the app and join.
+      if(game.createdBy !== currentUser.uid) throw 'Only the creater can start.';
+      const roundNumber = 1;
+      // The round must be persisted before the currentRound changes.
+      return gameRef(gameKey)
+        .child('rounds/'+roundNumber)
+        .set({number: roundNumber})
+        .then(() => {
+          return gameRef(gameKey).child('currentRound').set(roundNumber);
+        })
+        .then(() => {
+          // Do not return any information. The requester will get data the same
+          // as all other players.
+          return {success: true};
+        });
+    });
+}

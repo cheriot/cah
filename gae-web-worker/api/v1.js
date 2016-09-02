@@ -18,6 +18,17 @@ function requireBody(req, field) {
   }
 }
 
+function jsonResult(res, errHttpCode) {
+  return (result) => {
+    console.error('jsonResult', result);
+    if(result.error) {
+      res.status(errHttpCode || 500).json(result);
+    } else {
+      res.json(result);
+    }
+  }
+}
+
 router.get('/', function foo(req, res) {
   res.json({ message: 'hooray! welcome to api v1!' });
 });
@@ -26,21 +37,25 @@ router.route('/games')
   .post(function(req, res) {
     games
       .create(res.locals.currentUser)
-      .then((game) => res.json(game) );
+      .then(jsonResult(res));
   });
 
+// Changes this to invite something? /invite/:code/accept?
+// Don't conflict with /games/:gameKey.
 router.route('/games/join')
   .post(function(req, res) {
     const inviteCode = requireBody(req, 'inviteCode');
     games
       .join(res.locals.currentUser, inviteCode)
-      .then((result) => {
-        if(result.error) {
-          res.status(404).json(result);
-        } else {
-          res.json(result);
-        }
-      });
+      .then(jsonResult(res, 404));
+  });
+
+router.route('/games/:gameKey/start')
+  // Deal the cards and start round one.
+  .post(function(req, res) {
+    games
+      .start(res.locals.currentUser, req.params.gameKey)
+      .then(jsonResult(res));
   });
 
 // Error handler. Must come after other routes and middleware.
@@ -53,12 +68,5 @@ router.use(function(err, req, res, next) {
   res.status(err.status || 500)
      .json({error: err.message});
 });
-
-// DEBUG
-// console.error('Registered routes');
-// const routes = router.stack.forEach((r) => {
-//   if(r.route) console.error(r.route.methods, r.route.path);
-//   else console.error('middleware');
-// });
 
 module.exports = router;

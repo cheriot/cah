@@ -179,5 +179,31 @@ describe('http resources', function() {
       });
     });
 
+    describe('/games/:gameKey/start', function() {
+      this.timeout(5000);
+
+      it('blows up', function() {
+        uid = 'fake-user-id';
+        var gameKey, inviteCode;
+        return chai.request(app)
+          .post('/api/v1/games')
+          .set('Authorization', 'fake-token')
+          .then(expect200)
+          .then((res) => {
+            console.error('created game');
+            expect(res.body.gameKey).to.be.a('String')
+            gameKey = res.body.gameKey;
+            inviteCode = res.body.inviteCode;
+          })
+          .then(() => {
+            return chai.request(app)
+              .post('/api/v1/games/'+gameKey+'/start')
+              .set('Authorization', 'fake-token')
+              .then(expect200)
+              .then(expectJson({success: true}));
+          });
+      });
+    });
+
   });
 });
