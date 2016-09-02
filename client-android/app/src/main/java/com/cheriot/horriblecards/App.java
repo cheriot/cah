@@ -11,6 +11,7 @@ import com.cheriot.horriblecards.modules.AppComponent;
 import com.cheriot.horriblecards.modules.AppModule;
 import com.cheriot.horriblecards.modules.DaggerAppComponent;
 import com.google.firebase.database.DatabaseReference;
+import com.squareup.leakcanary.LeakCanary;
 
 import javax.inject.Inject;
 
@@ -49,6 +50,7 @@ public class App extends Application {
                     .penaltyDropBox()
                     .build());
             Timber.plant(new Timber.DebugTree());
+            LeakCanary.install(this);
         }
 
         mAuthService.start();
