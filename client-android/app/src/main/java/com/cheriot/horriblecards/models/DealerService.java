@@ -1,5 +1,7 @@
 package com.cheriot.horriblecards.models;
 
+import com.cheriot.horriblecards.models.http.Dealer;
+
 import java.io.IOException;
 
 import javax.inject.Inject;

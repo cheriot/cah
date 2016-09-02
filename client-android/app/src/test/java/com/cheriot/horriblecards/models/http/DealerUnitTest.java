@@ -1,4 +1,6 @@
-package com.cheriot.horriblecards.models;
+package com.cheriot.horriblecards.models.http;
+
+import com.cheriot.horriblecards.models.GameIdentifier;
 
 import org.junit.After;
 import org.junit.Before;

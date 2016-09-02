@@ -1,6 +1,7 @@
-package com.cheriot.horriblecards.models;
+package com.cheriot.horriblecards.models.http;
 
 import com.cheriot.horriblecards.BuildConfig;
+import com.cheriot.horriblecards.models.GameIdentifier;
 
 import retrofit2.Call;
 import retrofit2.http.Field;

@@ -1,5 +1,7 @@
 package com.cheriot.horriblecards.models;
 
+import com.cheriot.horriblecards.models.http.Dealer;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;

@@ -5,7 +5,7 @@ import android.app.Application;
 import com.cheriot.horriblecards.App;
 import com.cheriot.horriblecards.InitializeUserProfileAuthListener;
 import com.cheriot.horriblecards.models.AuthService;
-import com.cheriot.horriblecards.models.Dealer;
+import com.cheriot.horriblecards.models.http.Dealer;
 import com.cheriot.horriblecards.models.DealerService;
 import com.cheriot.horriblecards.models.GameContainer;
 import com.cheriot.horriblecards.models.http.AuthInterceptor;
