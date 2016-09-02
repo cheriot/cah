@@ -2,6 +2,7 @@
   "name": "iah-gae-web-worker",
   "version": "1.0.0",
   "description": "REST API for a cards against humanity knock off. Runs on Google's App Engine Flexible Environment.",
+  "repository": "github:cheriot/cah",
   "main": "app.js",
   "scripts": {
     "test": "mocha test/*_test.js test/**/*_test.js",
@@ -10,7 +11,8 @@
     "deploy": "gcloud app deploy"
   },
   "engines": {
-    "npm": "~6.3.1"
+    "npm": "~6.3.1",
+    "node": "~6.3.1"
   },
   "author": "Christopher Heriot",
   "license": "ISC",
