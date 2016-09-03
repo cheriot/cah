@@ -16,7 +16,13 @@
         android:id="@+id/players_recycler"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
+        android:layout_gravity="center_horizontal"/>
 
-    </android.support.v7.widget.RecyclerView>
+    <Button
+        android:id="@+id/start_game_button"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="startPlaying"
+        android:text="@string/play_start_game"/>
 </LinearLayout>

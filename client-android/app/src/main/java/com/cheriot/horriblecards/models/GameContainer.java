@@ -37,7 +37,7 @@ public class GameContainer {
     }
 
     private void startGame(String gameKey) {
-        Timber.d("startGame %s.", gameKey);
+        Timber.d("startPlaying %s.", gameKey);
         mGameKey = gameKey;
         try {
             String uid = mAuthService.requireUid();
@@ -46,6 +46,10 @@ public class GameContainer {
             Timber.e(ua, "Unable to start the game without an authenticated user.");
         }
 
+    }
+
+    public String getGameKey() {
+        return mGameKey;
     }
 
 }

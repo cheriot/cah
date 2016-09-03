@@ -2,6 +2,7 @@ package com.cheriot.horriblecards.presenters;
 
 import com.cheriot.horriblecards.R;
 import com.cheriot.horriblecards.activities.PlayGameView;
+import com.cheriot.horriblecards.models.DealerService;
 import com.cheriot.horriblecards.models.GameContainer;
 import com.cheriot.horriblecards.models.FirebaseGame;
 import com.cheriot.horriblecards.models.Player;
@@ -21,12 +22,13 @@ public class PlayGamePresenter {
     private GameContainer mGameContainer;
     @Inject FirebaseGame mGame;
     @Inject FirebasePlayers mGamePlayers;
+    @Inject DealerService mDealerService;
 
     public PlayGamePresenter(GameContainer gameContainer) {
         mGameContainer = gameContainer;
     }
 
-    public void startPlaying(String gameKey) {
+    public void initGame(String gameKey) {
         mGameContainer.playGame(gameKey).inject(this);
         mGamePlayers.setConnected();
 
@@ -41,6 +43,20 @@ public class PlayGamePresenter {
             @Override
             public void onError(Throwable t) {
                 getPlayGameView().displayError("Error accessing game.");
+            }
+        });
+    }
+
+    public void startPlaying() {
+        mDealerService.startGame(mGameContainer.getGameKey(), new TaskResultListener() {
+            @Override
+            public void onSuccess(Object result) {
+                getPlayGameView().displayStarted();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                getPlayGameView().displayStartError();
             }
         });
     }

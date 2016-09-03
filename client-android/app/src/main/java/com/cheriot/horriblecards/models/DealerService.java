@@ -1,5 +1,6 @@
 package com.cheriot.horriblecards.models;
 
+import com.cheriot.horriblecards.models.http.BaseResponse;
 import com.cheriot.horriblecards.models.http.Dealer;
 
 import java.io.IOException;
@@ -45,8 +46,7 @@ public class DealerService {
 
             @Override
             public void onFailure(Call<GameIdentifier> call, Throwable t) {
-                // Failures that are not responses from the server.
-                Timber.e(t, "Failed to start game.");
+                logFailure("createGame", t);
                 listener.onError(t);
             }
         });
@@ -69,7 +69,29 @@ public class DealerService {
 
             @Override
             public void onFailure(Call<GameIdentifier> call, Throwable t) {
+                logFailure("joinGame", t);
+                listener.onError(t);
+            }
+        });
+    }
 
+    public void startGame(final String gameKey, final TaskResultListener listener) {
+        Call<BaseResponse> call = mDealer.startGame(gameKey);
+        call.enqueue(new Callback<BaseResponse>() {
+            @Override
+            public void onResponse(Call<BaseResponse> call, Response<BaseResponse> response) {
+                if(response.isSuccessful()) {
+                    Timber.d("startGame success %s.", gameKey);
+                    listener.onSuccess(null);
+                } else {
+                    logErrorResponse("startGame", response);
+                    listener.onError(null);
+                }
+            }
+            @Override
+            public void onFailure(Call<BaseResponse> call, Throwable t) {
+                logFailure("startGame", t);
+                listener.onError(t);
             }
         });
     }
@@ -80,5 +102,10 @@ public class DealerService {
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
+    }
+
+    private static void logFailure(String msg, Throwable t) {
+        // Failures that are not HTTP responses.
+        Timber.e(t, "onFailure %s.", msg);
     }
 }

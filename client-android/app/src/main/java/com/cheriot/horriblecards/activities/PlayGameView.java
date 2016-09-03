@@ -8,5 +8,7 @@ import com.cheriot.horriblecards.recycler.PlayersRecyclerAdapter;
 public interface PlayGameView {
     void displayInviteCode(String inviteCode);
     void displayPlayers(PlayersRecyclerAdapter adapter);
+    void displayStarted();
+    void displayStartError();
     void displayError(String msg);
 }

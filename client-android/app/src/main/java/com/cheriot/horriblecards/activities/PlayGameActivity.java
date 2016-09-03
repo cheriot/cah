@@ -8,6 +8,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.cheriot.horriblecards.App;
@@ -28,6 +30,7 @@ public class PlayGameActivity extends AppCompatActivity implements PlayGameView 
     @Inject PlayGamePresenter mPlayGamePresenter;
     @BindView(R.id.invite_code) TextView mInviteCodeText;
     @BindView(R.id.players_recycler) RecyclerView mPlayersRecyclerView;
+    @BindView(R.id.start_game_button) Button mStartButton;
 
     public static final String GAME_KEY_PARAM = "GAME_KEY_PARAM";
     public static void startActivity(Activity source, String gameKey) {
@@ -35,6 +38,10 @@ public class PlayGameActivity extends AppCompatActivity implements PlayGameView 
         intent.putExtra(GAME_KEY_PARAM, gameKey);
         source.startActivity(intent);
     }
+
+    /*
+     * Lifecycle
+     */
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -49,10 +56,14 @@ public class PlayGameActivity extends AppCompatActivity implements PlayGameView 
         Intent intent = getIntent();
         String gameKey = intent.getStringExtra(GAME_KEY_PARAM);
         mInviteCodeText.setText(gameKey);
-        mPlayGamePresenter.startPlaying(gameKey);
+        mPlayGamePresenter.initGame(gameKey);
 
         mPlayersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
+
+    /*
+     * Presenter calls
+     */
 
     @Override
     public void displayPlayers(PlayersRecyclerAdapter adapter) {
@@ -67,5 +78,24 @@ public class PlayGameActivity extends AppCompatActivity implements PlayGameView 
     @Override
     public void displayError(String msg) {
         Snackbar.make(mInviteCodeText, msg, Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void displayStartError() {
+        mStartButton.setEnabled(true);
+        displayError("Failed to start game.");
+    }
+
+    @Override
+    public void displayStarted() {
+        mStartButton.setVisibility(View.GONE);
+    }
+
+    /*
+     * Event Handlers
+     */
+    public void startPlaying(View view) {
+        mStartButton.setEnabled(false);
+        mPlayGamePresenter.startPlaying();
     }
 }

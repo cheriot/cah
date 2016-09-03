@@ -5,11 +5,12 @@ import android.app.Application;
 import com.cheriot.horriblecards.App;
 import com.cheriot.horriblecards.InitializeUserProfileAuthListener;
 import com.cheriot.horriblecards.models.AuthService;
-import com.cheriot.horriblecards.models.http.Dealer;
 import com.cheriot.horriblecards.models.DealerService;
 import com.cheriot.horriblecards.models.GameContainer;
 import com.cheriot.horriblecards.models.http.AuthInterceptor;
+import com.cheriot.horriblecards.models.http.Dealer;
 import com.cheriot.horriblecards.presenters.PlayGamePresenter;
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -51,7 +52,9 @@ public class AppModule {
     @Provides
     @Singleton
     FirebaseAuth providesFirebaseAuth() {
-        return FirebaseAuth.getInstance();
+        FirebaseApp firebaseApp = FirebaseApp.getInstance();
+        if(firebaseApp == null) throw new RuntimeException("Where is the app?");
+        return FirebaseAuth.getInstance(firebaseApp);
     }
 
     @Provides

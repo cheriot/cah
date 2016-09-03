@@ -8,6 +8,7 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 
 /**
  * The dealer handles game actions when
@@ -27,4 +28,7 @@ public interface Dealer {
     @POST(API_VERSION + "/games/join")
     @Headers("User-Agent: HorribleCards Android " + BuildConfig.VERSION_NAME)
     Call<GameIdentifier> joinGame(@Field("inviteCode") String inviteCode);
+
+    @POST(API_VERSION + "/games/{gameKey}/start")
+    Call<BaseResponse> startGame(@Path("gameKey") String gameKey);
 }
