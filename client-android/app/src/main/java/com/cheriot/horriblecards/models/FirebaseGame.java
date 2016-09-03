@@ -42,6 +42,27 @@ public class FirebaseGame {
        });
     }
 
+    public void subscribeToGameState(final GameStateListener gameStateListener) {
+        mGameRef.child("currentRound").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Timber.i("gameState router %s.", dataSnapshot.getValue());
+                Long currentRound = (Long)dataSnapshot.getValue();
+                if(dataSnapshot.getValue() == null) {
+                    gameStateListener.onUnstartedState();
+                } else {
+                    gameStateListener.onChooseCardState(currentRound.intValue());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Timber.e(databaseError.toException(), "subscribeToGameState onCancelled");
+                gameStateListener.onErrorState(databaseError.toException());
+            }
+        });
+    }
+
     public DatabaseReference getGameRef() {
         return mGameRef;
     }

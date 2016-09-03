@@ -16,6 +16,8 @@ import com.cheriot.horriblecards.App;
 import com.cheriot.horriblecards.R;
 import com.cheriot.horriblecards.presenters.PlayGamePresenter;
 import com.cheriot.horriblecards.recycler.PlayersRecyclerAdapter;
+import com.cheriot.horriblecards.views.ChooseCardState;
+import com.cheriot.horriblecards.views.UnstartedState;
 
 import javax.inject.Inject;
 
@@ -31,6 +33,8 @@ public class PlayGameActivity extends AppCompatActivity implements PlayGameView 
     @BindView(R.id.invite_code) TextView mInviteCodeText;
     @BindView(R.id.players_recycler) RecyclerView mPlayersRecyclerView;
     @BindView(R.id.start_game_button) Button mStartButton;
+    @BindView(R.id.state_unstarted) UnstartedState mUnstartedState;
+    @BindView(R.id.state_choose_card) ChooseCardState mChooseCardState;
 
     public static final String GAME_KEY_PARAM = "GAME_KEY_PARAM";
     public static void startActivity(Activity source, String gameKey) {
@@ -55,7 +59,6 @@ public class PlayGameActivity extends AppCompatActivity implements PlayGameView 
 
         Intent intent = getIntent();
         String gameKey = intent.getStringExtra(GAME_KEY_PARAM);
-        mInviteCodeText.setText(gameKey);
         mPlayGamePresenter.initGame(gameKey);
 
         mPlayersRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -86,9 +89,19 @@ public class PlayGameActivity extends AppCompatActivity implements PlayGameView 
         displayError("Failed to start game.");
     }
 
+    public void displayUnstartedState() {
+        mUnstartedState.setVisibility(View.VISIBLE);
+    }
+
     @Override
     public void displayStarted() {
-        mStartButton.setVisibility(View.GONE);
+        mUnstartedState.setVisibility(View.GONE);
+        mChooseCardState.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void displayRound(int roundNumber) {
+        mChooseCardState.startRound(roundNumber);
     }
 
     /*

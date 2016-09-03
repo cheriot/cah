@@ -11,4 +11,6 @@ public interface PlayGameView {
     void displayStarted();
     void displayStartError();
     void displayError(String msg);
+    void displayUnstartedState();
+    void displayRound(int roundNumber);
 }
