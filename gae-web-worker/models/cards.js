@@ -80,7 +80,7 @@ function drawCard(shuffledDeckRef) {
         .child('orderedCards/'+drawnPosition)
         .once('value')
         .then((snapshot) => {
-          return _.values(snapshot.val())[0];
+          return snapshot.val();
         });
     });
 }

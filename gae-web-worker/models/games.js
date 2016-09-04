@@ -121,8 +121,7 @@ function roundValue(gameKey, number) {
   // deal black card, choose judge
   return cards.pickQuestion(gameKey)
     .then((question) => {
-      round.question = question;
-      return round;
+      return {number: number, question: question};
     });
 }
 
