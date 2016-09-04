@@ -16,15 +16,18 @@
 //     [roundNumber]: {
 //       number
 //       question
+//       judgeUid
 //     }
 //   }
 
-const firebase = require('./firebase'),
+const
+  firebase = require('./firebase'),
   auth = require('./auth'),
   cards = require('./cards'),
   id_conceal = require('./id_conceal');
 
-const assert = require('assert'),
+const
+  assert = require('assert'),
   _ = require('lodash');
 
 function allocateGameId() {
@@ -92,6 +95,7 @@ function findGameByKey(gameKey) {
     .then((snapshot) => {
       if(!snapshot.exists()) throw new Error('No game found '+gameKey);
       const game = snapshot.val()[gameKey];
+      game.gameKey = gameKey;
       return game;
     });
 }
@@ -116,13 +120,20 @@ function findGameByCode(inviteCode) {
     });
 }
 
-function roundValue(gameKey, number) {
+function chooseJudge(game) {
+  return Promise.resolve(game.createdBy);
+}
+
+function roundValue(game, number) {
   const round = {number: number};
   // deal black card, choose judge
-  return cards.pickQuestion(gameKey)
-    .then((question) => {
-      return {number: number, question: question};
-    });
+  return Promise.all([
+    cards.pickQuestion(game.gameKey),
+    chooseJudge(game)
+  ])
+  .then(([question, judgeUid]) => {
+    return {number: number, question: question, judgeUid: judgeUid};
+  });
 }
 
 module.exports.create = (currentUser) => {
@@ -162,7 +173,7 @@ module.exports.start = (currentUser, gameKey) => {
       return cards.shuffleGame(gameKey, playerUids)
         .then(() => {
           // Set up the round.
-          return roundValue(gameKey, roundNumber)
+          return roundValue(game, roundNumber)
             .then((round) => {
               return gameRef(gameKey)
                 .child('rounds/'+roundNumber)

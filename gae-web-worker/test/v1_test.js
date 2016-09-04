@@ -70,6 +70,39 @@ describe('http resources', function() {
     return require('../models/cards').loadCards();
   })
 
+  function createGame() {
+    return chai.request(app)
+      .post('/api/v1/games')
+      .set('Authorization', 'fake-token')
+      .then(expect200)
+      .then(expectNoCache)
+      .then(expectJson())
+      .then((res) => {
+        expect(res.body.gameKey).to.be.a('String')
+        return [res.body.gameKey, res.body.inviteCode];
+      });
+  }
+
+  function joinGame(gameKey, inviteCode) {
+    return chai.request(app)
+      .post('/api/v1/games/join')
+      .set('Authorization', 'fake-token')
+      .send({inviteCode: inviteCode})
+      .then(expect200)
+      .then((res) => {
+        expect(res.body.gameKey).to.eq(gameKey);
+        expect(res.body.inviteCode).to.eq(inviteCode);
+      });
+  }
+
+  function startGame(gameKey) {
+    return chai.request(app)
+      .post('/api/v1/games/'+gameKey+'/start')
+      .set('Authorization', 'fake-token')
+      .then(expect200)
+      .then(expectJson({success: true}));
+  }
+
   // TODO extract admin tests into another file.
   describe('/admin/init', function() {
     it('initializes the database if empty.', function() {
@@ -88,15 +121,7 @@ describe('http resources', function() {
       it('creates a game', function() {
         this.timeout(5000); // Hitting a live firebase.
         uid = 'fake-user-id';
-        return chai.request(app)
-          .post('/api/v1/games')
-          .set('Authorization', 'fake-token')
-          .then(expect200)
-          .then(expectNoCache)
-          .then(expectJson())
-          .then((res) => {
-            expect(res.body.gameKey).to.be.a('String')
-          });
+        return createGame();
       });
 
       it('requires authentication', function() {
@@ -159,26 +184,10 @@ describe('http resources', function() {
         // Create a game and then join it.
         uid = 'fake-user-id';
         var gameKey, inviteCode;
-        return chai.request(app)
-          .post('/api/v1/games')
-          .set('Authorization', 'fake-token')
-          .then(expect200)
-          .then((res) => {
-            expect(res.body.gameKey).to.be.a('String')
-            gameKey = res.body.gameKey;
-            inviteCode = res.body.inviteCode;
-          })
-          .then(() => {
+        return createGame()
+          .then(([gameKey, inviteCode]) => {
             uid = 'second-fake-user-id';
-            return chai.request(app)
-              .post('/api/v1/games/join')
-              .set('Authorization', 'fake-token')
-              .send({inviteCode: inviteCode});
-          })
-          .then(expect200)
-          .then((res) => {
-            expect(res.body.gameKey).to.eq(gameKey);
-            expect(res.body.inviteCode).to.eq(inviteCode);
+            return joinGame(gameKey, inviteCode);
           });
 
       });
@@ -187,27 +196,15 @@ describe('http resources', function() {
     describe('/games/:gameKey/start', function() {
       this.timeout(5000);
 
-      it('blows up', function() {
+      it('starts', function() {
         uid = 'fake-user-id';
         var gameKey, inviteCode;
-        return chai.request(app)
-          .post('/api/v1/games')
-          .set('Authorization', 'fake-token')
-          .then(expect200)
-          .then((res) => {
-            console.error('created game');
-            expect(res.body.gameKey).to.be.a('String')
-            gameKey = res.body.gameKey;
-            inviteCode = res.body.inviteCode;
-          })
-          .then(() => {
-            return chai.request(app)
-              .post('/api/v1/games/'+gameKey+'/start')
-              .set('Authorization', 'fake-token')
-              .then(expect200)
-              .then(expectJson({success: true}));
+        return createGame()
+          .then(([gameKey, inviteCode]) => {
+            return startGame(gameKey);
           });
       });
+
     });
 
   });
