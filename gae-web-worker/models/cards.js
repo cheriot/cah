@@ -1,10 +1,45 @@
 const firebase = require('./firebase');
 const _ = require('lodash');
 
+const
+  questionsType = 'questions',
+  answersType = 'answers';
+  cardTypes = [questionsType, answersType];
+
+function cardsRef(cardType) {
+  return firebase.ref('cards').child(cardType);
+}
+
+function shuffledDecksRef(gameKey, cardType) {
+  return firebase.ref('shuffledCards/'+gameKey+'/'+cardType);
+}
+
 function shuffleGame(gameKey, playerUids) {
-  // Shuffle for this game and copy into a location that dealt cards can
-  // be deleted from.
-  return Promise.resolve();
+  // Shuffle for this game and copy into a location that allows drawing cards
+  // in the shuffled order.
+  const promises = ['questions', 'answers'].map((cardType) => {
+    return firebase
+      .ref('cards/questions')
+      .once('value')
+      .then((snapshot) => {
+        const allCards = snapshot.val()
+
+        const shuffled = shuffle(_.keys(allCards))
+          .map((cardKey, index) => {
+            return Object.assign(
+              allCards[cardKey],
+              {cardKey: cardKey, position: index}
+            );
+        });
+
+        return shuffledDecksRef(gameKey, cardType)
+          .set({
+            nextPosition: 0,
+            orderedCards: shuffled
+          });
+      });
+  });
+  return Promise.all(_.flatten(promises));
 }
 
 function shuffle(array) {
@@ -23,30 +58,47 @@ function shuffle(array) {
   return array;
 }
 
-function pickQuestion(gameKey) {
-  // This does not remove the previously picked cards from the deck.
+function drawCard(shuffledDeckRef) {
+  function transform(currentValue) {
+    return currentValue+1;
+  }
 
-  return firebase.ref('cards/questions').once('value')
-    .then((snapshot) => {
-      const val = snapshot.val()
-      console.error(val);
+  // increment the shuffled decks position and grab that card
+  return shuffledDeckRef
+    .child('nextPosition')
+    .transaction(transform, (error, committed, snapshot) => {
+      if (error) {
+        throw 'Transaction failed abnormally!'+error;
+      } else if (!committed) {
+        throw 'Aborted transaction.';
+      }
+    })
+    .then((transactionResult) => {
+      const drawnPosition = transactionResult.snapshot.val();
 
-      const drawnCardKey = shuffle(_.keys(val))[0];
-      return val[drawnCardKey];
+      return shuffledDeckRef
+        .child('orderedCards/'+drawnPosition)
+        .once('value')
+        .then((snapshot) => {
+          return _.values(snapshot.val())[0];
+        });
     });
 }
 
+function pickQuestion(gameKey) {
+  return drawCard(shuffledDecksRef(gameKey, questionsType));
+}
+
 function pickAnswer(gameKey) {
-  throw 'Not implemented yet.';
+  return drawCard(shuffledDecksRef(gameKey, answersType));
 }
 
 function loadCards() {
-  function setCard(type, card) {
+  function setCard(cardType, card) {
     if(!card.externalId) throw 'card.externalId is required';
-    const cardsRef = firebase.ref('cards');
-    const deckRef = cardsRef.child(type);
 
-    return deckRef
+    const cr = cardsRef(cardType);
+    return cr
       .orderByChild('externalId')
       .equalTo(card.externalId)
       .once('value')
@@ -56,23 +108,26 @@ function loadCards() {
           write = 'update';
           const val = snapshot.val();
           const existingKey = _.keys(val)[0];
-          promise = deckRef.child(existingKey).set(card);
+          promise = cr.child(existingKey).set(card);
         } else {
           write = 'insert';
-          promise = deckRef.push(card);
+          promise = cr.push(card);
         }
-        console.error(write, type, 'card', card.text);
+        console.error(write, cardType, 'card', card.text);
         return promise;
       });
   }
 
-  const questions = require('../data/questions').questions;
-  const answers = require('../data/answers').answers;
-  // cards/{questions,answers} will have the cononical key and data
-  const qPromises = questions.map((q) => setCard('questions', q))
-  const aPromises = answers.map((a) => setCard('answers', a));
+  function dataForCardType(cardType) {
+    return require('../data/'+cardType+'.json')[cardType];
+  }
 
-  return Promise.all(qPromises.concat(aPromises))
+  // cards/{questions,answers} will have the cononical key and data
+  const promises = cardTypes.map((cardType) => {
+    return dataForCardType(cardType)
+      .map((card) => setCard(cardType, card));
+  });
+  return Promise.all(_.flatten(promises))
 }
 
 module.exports = {

@@ -156,14 +156,23 @@ module.exports.start = (currentUser, gameKey) => {
       // time to download or open the app and join.
       if(game.createdBy !== currentUser.uid) throw 'Only the creater can start.';
       const roundNumber = 1;
-      // The round must be persisted before the currentRound changes.
-      return roundValue(gameKey, roundNumber)
-        .then((round) => {
-          return gameRef(gameKey)
-            .child('rounds/'+roundNumber)
-            .set(round);
+      // 1. Shuffle cards for the game.
+      // 2. Start the first round.
+
+      const playerUids = _.keys(game.players);
+      return cards.shuffleGame(gameKey, playerUids)
+        .then(() => {
+          // Set up the round.
+          return roundValue(gameKey, roundNumber)
+            .then((round) => {
+              return gameRef(gameKey)
+                .child('rounds/'+roundNumber)
+                .set(round);
+            });
         })
         .then(() => {
+          // Now that the round is persisted, making it current will trigger
+          // clients to start playing it.
           return gameRef(gameKey).child('currentRound').set(roundNumber);
         })
         .then(() => {
