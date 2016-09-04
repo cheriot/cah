@@ -15,13 +15,16 @@
 //   rounds: {
 //     [roundNumber]: {
 //       number
+//       question
 //     }
 //   }
 
 const firebase = require('./firebase'),
   auth = require('./auth'),
-  assert = require('assert'),
-  id_conceal = require('./id_conceal'),
+  cards = require('./cards'),
+  id_conceal = require('./id_conceal');
+
+const assert = require('assert'),
   _ = require('lodash');
 
 function allocateGameId() {
@@ -113,6 +116,16 @@ function findGameByCode(inviteCode) {
     });
 }
 
+function roundValue(gameKey, number) {
+  const round = {number: number};
+  // deal black card, choose judge
+  return cards.pickQuestion(gameKey)
+    .then((question) => {
+      round.question = question;
+      return round;
+    });
+}
+
 module.exports.create = (currentUser) => {
   return allocateGameId()
     .then((gameId) => id_conceal.encode(gameId))
@@ -144,15 +157,18 @@ module.exports.start = (currentUser, gameKey) => {
       if(game.createdBy !== currentUser.uid) throw 'Only the creater can start.';
       const roundNumber = 1;
       // The round must be persisted before the currentRound changes.
-      return gameRef(gameKey)
-        .child('rounds/'+roundNumber)
-        .set({number: roundNumber})
+      return roundValue(gameKey, roundNumber)
+        .then((round) => {
+          return gameRef(gameKey)
+            .child('rounds/'+roundNumber)
+            .set(round);
+        })
         .then(() => {
           return gameRef(gameKey).child('currentRound').set(roundNumber);
         })
         .then(() => {
-          // Do not return any information. The requester will get data the same
-          // as all other players.
+          // Do not return any information. The requester will get data from
+          // firebase the same as all other players.
           return {success: true};
         });
     });

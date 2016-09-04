@@ -1,0 +1,14 @@
+{
+  "questions": [
+    { "externalId": 1, "text": "Making love to me is like _."},
+    { "externalId": 2, "text": "Our father, who art in heaven, _ be thy name."},
+    { "externalId": 3, "text": "Is this a _ in my Happy Meal?"},
+    { "externalId": 4, "text": "Don't worry officer, that just my _."},
+    { "externalId": 5, "text": "The road to hell is paved with _."},
+    { "externalId": 6, "text": "With great power comes _."},
+    { "externalId": 7, "text": "Step 1, put a _ in a box."},
+    { "externalId": 8, "text": "On a scale from _ to _, how bad is the pain?"},
+    { "externalId": 9, "text": "The secret 11th commandment: Thou shalt _."},
+    { "externalId": 10, "text": "Listen, Gary, I like you. But if you want that corner office, you're going to have to show me _."}
+  ]
+}

@@ -44,9 +44,12 @@ function error(err) {
 describe('http resources', function() {
 
   var app, uid;
-  before(() => {
+  before(function() {
+    this.timeout(9000);
+
     const fb = require('../models/firebase');
     firebaseMock.installMockClient(fb);
+
     fb.setAuth({
       verifyIdToken: function(token) {
         // If the test set an empty uid, reject.
@@ -62,7 +65,9 @@ describe('http resources', function() {
         throw new Error('Fake authentication required error.');
       }
     }
+
     app = require('../app');
+    return require('../models/cards').loadCards();
   })
 
   // TODO extract admin tests into another file.
