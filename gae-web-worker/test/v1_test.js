@@ -85,7 +85,7 @@ describe('http resources', function() {
 
   function joinGame(gameKey, inviteCode) {
     return chai.request(app)
-      .post('/api/v1/games/join')
+      .patch('/api/v1/games/join')
       .set('Authorization', 'fake-token')
       .send({inviteCode: inviteCode})
       .then(expect200)
@@ -97,7 +97,7 @@ describe('http resources', function() {
 
   function startGame(gameKey) {
     return chai.request(app)
-      .post('/api/v1/games/'+gameKey+'/start')
+      .patch('/api/v1/games/'+gameKey+'/start')
       .set('Authorization', 'fake-token')
       .then(expect200)
       .then(expectJson({success: true}));
@@ -168,7 +168,7 @@ describe('http resources', function() {
       it('requires authentication', function() {
         uid = null;
         return chai.request(app)
-          .post('/api/v1/games')
+          .patch('/api/v1/games/join')
           .send()
           .then(() => 'never called, but needed to get a promise')
           .catch((err) => {

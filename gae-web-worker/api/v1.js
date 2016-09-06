@@ -40,10 +40,9 @@ router.route('/games')
       .then(jsonResult(res));
   });
 
-// Changes this to invite something? /invite/:code/accept?
-// Don't conflict with /games/:gameKey.
 router.route('/games/join')
-  .post(function(req, res) {
+  .patch(function(req, res) {
+    // TODO Also accept gameKey
     const inviteCode = requireBody(req, 'inviteCode');
     games
       .join(res.locals.currentUser, inviteCode)
@@ -52,7 +51,7 @@ router.route('/games/join')
 
 router.route('/games/:gameKey/start')
   // Deal the cards and start round one.
-  .post(function(req, res) {
+  .patch(function(req, res) {
     games
       .start(res.locals.currentUser, req.params.gameKey)
       .then(jsonResult(res));
