@@ -10,6 +10,11 @@
 //       connected
 //     }
 //   }
+//   hands: {
+//     [playerKey]: {
+//       [position]: card
+//     }
+//   }
 //
 //   currentRound
 //   rounds: {
@@ -136,6 +141,18 @@ function roundValue(game, number) {
   });
 }
 
+function initialHandsValue(gameKey, playerUids) {
+  const cardsPerHand = 7;
+  return cards.pickAnswer(gameKey, playerUids.length*cardsPerHand)
+    .then((cards) => {
+      return playerUids.reduce((hands, uid, index) => {
+          const start = index*cardsPerHand;
+          hands[uid] = cards.slice(start, start+cardsPerHand)
+          return hands;
+        }, {});
+    });
+}
+
 module.exports.create = (currentUser) => {
   return allocateGameId()
     .then((gameId) => id_conceal.encode(gameId))
@@ -165,13 +182,20 @@ module.exports.start = (currentUser, gameKey) => {
       // Only the person that created the game can start it. This gives people
       // time to download or open the app and join.
       if(game.createdBy !== currentUser.uid) throw 'Only the creater can start.';
-      const roundNumber = 1;
-      // 1. Shuffle cards for the game.
-      // 2. Start the first round.
 
+      // Shuffle cards for the game. Future requests will draw from positions established here.
+      const roundNumber = 1;
       const playerUids = _.keys(game.players);
       return cards.shuffleGame(gameKey, playerUids)
         .then(() => {
+          // Deal answer cards.
+          const handsPromise = initialHandsValue(gameKey, playerUids)
+            .then((hands) => {
+              return gameRef(gameKey)
+                .child('hands')
+                .set(hands);
+            });
+
           // Set up the round.
           return roundValue(game, roundNumber)
             .then((round) => {

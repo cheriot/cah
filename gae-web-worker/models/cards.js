@@ -19,7 +19,7 @@ function shuffleGame(gameKey, playerUids) {
   // in the shuffled order.
   const promises = ['questions', 'answers'].map((cardType) => {
     return firebase
-      .ref('cards/questions')
+      .ref('cards/'+cardType)
       .once('value')
       .then((snapshot) => {
         const allCards = snapshot.val()
@@ -58,13 +58,14 @@ function shuffle(array) {
   return array;
 }
 
-function drawCard(shuffledDeckRef) {
+function drawCard(deckRef, count) {
+  const increment = count || 1;
   function transform(currentValue) {
-    return currentValue+1;
+    return currentValue+increment;
   }
 
   // increment the shuffled decks position and grab that card
-  return shuffledDeckRef
+  return deckRef
     .child('nextPosition')
     .transaction(transform, (error, committed, snapshot) => {
       if (error) {
@@ -75,12 +76,17 @@ function drawCard(shuffledDeckRef) {
     })
     .then((transactionResult) => {
       const drawnPosition = transactionResult.snapshot.val();
+      const startAt = drawnPosition - increment;
 
-      return shuffledDeckRef
-        .child('orderedCards/'+drawnPosition)
+      return deckRef
+        .child('orderedCards')
+        .orderByChild('position')
+        .startAt(startAt)
+        .endAt(drawnPosition)
         .once('value')
         .then((snapshot) => {
-          return snapshot.val();
+          const val = snapshot.val();
+          return val;
         });
     });
 }
@@ -89,8 +95,8 @@ function pickQuestion(gameKey) {
   return drawCard(shuffledDecksRef(gameKey, questionsType));
 }
 
-function pickAnswer(gameKey) {
-  return drawCard(shuffledDecksRef(gameKey, answersType));
+function pickAnswer(gameKey, numCards) {
+  return drawCard(shuffledDecksRef(gameKey, answersType), numCards);
 }
 
 function loadCards() {
