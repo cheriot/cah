@@ -57,6 +57,30 @@ router.route('/games/:gameKey/start')
       .then(jsonResult(res));
   });
 
+router.route('/games/:gameKey/rounds/:roundNumber/submit/:cardKey')
+  .patch(function(req, res) {
+    games
+      .submitCard(
+        res.locals.currentUser,
+        req.params.gameKey,
+        req.params.roundNumber,
+        req.params.cardKey
+      )
+      .then(jsonResult(res));
+  });
+
+router.route('/games/:gameKey/rounds/:roundNumber/judge')
+  .patch(function(req, res) {
+    console.error('judge params', req.params);
+    games
+      .judgeRound(
+        res.locals.currentUser,
+        req.params.gameKey,
+        req.params.roundNumber
+      )
+      .then(jsonResult(res));
+  });
+
 // Error handler. Must come after other routes and middleware.
 router.use(function(err, req, res, next) {
   if(err.status == 500 || !err.status) {

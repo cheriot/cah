@@ -77,6 +77,10 @@ function gameRef(gameKey) {
   return firebase.ref('games/'+gameKey);
 }
 
+function roundRef(gameKey, roundNumber) {
+  return gameRef(gameKey).child('rounds').child(roundNumber);
+}
+
 function createGame(currentUser, inviteCode) {
   assert(inviteCode, 'Valid inviteCode required.');
 
@@ -93,6 +97,7 @@ function createGame(currentUser, inviteCode) {
 }
 
 function findGameByKey(gameKey) {
+  // TODO accept a playerUid and verify the requester is in the game.
   return firebase.ref('games')
     .orderByKey()
     .equalTo(gameKey)
@@ -104,6 +109,8 @@ function findGameByKey(gameKey) {
       return game;
     });
 }
+// Expose this method to verify test expectations.
+module.exports.findGameByKey = findGameByKey;
 
 function findGameByCode(inviteCode) {
   return firebase.ref('games')
@@ -137,7 +144,12 @@ function roundValue(game, number) {
     chooseJudge(game)
   ])
   .then(([question, judgeUid]) => {
-    return {number: number, question: question, judgeUid: judgeUid};
+    return {
+      state: 'SUBMITTING',
+      number: number,
+      question: question,
+      judgeUid: judgeUid
+    };
   });
 }
 
@@ -150,6 +162,62 @@ function initialHandsValue(gameKey, playerUids) {
           hands[uid] = cards.slice(start, start+cardsPerHand)
           return hands;
         }, {});
+    });
+}
+
+function requireCard(hand, cardKey) {
+  const card = _.values(hand).find((card) => card.cardKey == cardKey);
+  if(!card) throw new Error('Unable to find card '+cardKey+' in player\'s hand.');
+  return card;
+}
+
+function requireRound(game, roundNumber) {
+  if(game.currentRound != roundNumber)
+    throw new Error('Round '+roundNumber+' is no longer current. Try '+game.currentRound+'.');
+  const round = game.rounds[roundNumber];
+  if(!round) throw new Error('Unable to find round '+roundNumber);
+  return round;
+}
+
+function requireJudge(game, roundNumber, currentUser) {
+  const round = game.rounds[roundNumber];
+  if(!round)
+    throw new Error('Invalid roundNumber '+roundNumber);
+  if(round.judgeUid != currentUser.uid)
+    throw new Error('Only the judge can commence judging.');
+  if(round.state != 'SUBMITTING')
+    throw new Error('Round is not ready for judging.');
+}
+
+module.exports.judgeRound = (currentUser, gameKey, roundNumber) => {
+
+  return findGameByKey(gameKey)
+    .then((game) => {
+      requireJudge(game, roundNumber, currentUser);
+      requireRound(game, roundNumber);
+      return roundRef(gameKey, roundNumber)
+        .child('state')
+        .set('JUDGING');
+    })
+    .then(() => {
+      return {gameKey: gameKey, roundNumber: roundNumber, success: true};
+    })
+    .catch((err) => {throw err});
+}
+
+module.exports.submitCard = (currentUser, gameKey, roundNumber, cardKey) => {
+  return findGameByKey(gameKey)
+    .then((game) => {
+      const hand = game.hands[currentUser.uid];
+      const card = requireCard(hand, cardKey);
+      const round = requireRound(game, roundNumber);
+      return roundRef(gameKey, roundNumber)
+        .child('cardsPlayed')
+        .child(currentUser.uid)
+        .set(card)
+        .then(() => {
+          return {gameKey: gameKey, roundNumber: roundNumber, cardKey: cardKey, success: true};
+        });
     });
 }
 
@@ -212,7 +280,7 @@ module.exports.start = (currentUser, gameKey) => {
         .then(() => {
           // Do not return any information. The requester will get data from
           // firebase the same as all other players.
-          return {success: true};
+          return {gameKey: gameKey, success: true};
         });
     });
 }

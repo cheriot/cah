@@ -37,15 +37,13 @@ function error(err) {
   throw err;
 }
 
-/*
- * Tests
- */
-
 describe('http resources', function() {
 
   var app, uid;
   before(function() {
-    this.timeout(9000);
+    this.timeout(20000);
+
+    // Override database root and authentication
 
     const fb = require('../models/firebase');
     firebaseMock.installMockClient(fb);
@@ -66,11 +64,19 @@ describe('http resources', function() {
       }
     }
 
+    // Instantiate the server
     app = require('../app');
+
+    // Load card data
     return require('../models/cards').loadCards();
   })
 
-  function createGame() {
+  /*
+   * Request types
+   */
+
+  function createGame(playerUid) {
+    uid = playerUid;
     return chai.request(app)
       .post('/api/v1/games')
       .set('Authorization', 'fake-token')
@@ -83,7 +89,8 @@ describe('http resources', function() {
       });
   }
 
-  function joinGame(gameKey, inviteCode) {
+  function joinGame(playerUid, gameKey, inviteCode) {
+    uid = playerUid;
     return chai.request(app)
       .patch('/api/v1/games/join')
       .set('Authorization', 'fake-token')
@@ -92,15 +99,46 @@ describe('http resources', function() {
       .then((res) => {
         expect(res.body.gameKey).to.eq(gameKey);
         expect(res.body.inviteCode).to.eq(inviteCode);
+        return gameKey;
       });
   }
 
-  function startGame(gameKey) {
+  function startGame(playerUid, gameKey) {
+    uid = playerUid;
     return chai.request(app)
       .patch('/api/v1/games/'+gameKey+'/start')
       .set('Authorization', 'fake-token')
       .then(expect200)
-      .then(expectJson({success: true}));
+      .then(expectJson({gameKey: gameKey, success: true}))
+      .then(() => gameKey);
+  }
+
+  function submitCard(playerUid, gameKey, roundNumber, cardKey) {
+    uid = playerUid;
+    return chai.request(app)
+      .patch('/api/v1/games/'+gameKey+'/rounds/'+roundNumber+'/submit/'+cardKey)
+      .set('Authorization', 'fake-token')
+      .then(expect200)
+      .then((res) => {
+        expect(res.body.success).to.eq(true);
+        return res.body;
+      });
+  }
+
+  function judgeRound(playerUid, gameKey, roundNumber) {
+    uid = playerUid;
+    return chai.request(app)
+      .patch('/api/v1/games/'+gameKey+'/rounds/'+roundNumber+'/judge')
+      .set('Authorization', 'fake-token')
+      .then(expect200)
+      .then((res) => {
+        expect(res.body.success).to.eq(true);
+        return res.body;
+      });
+  }
+
+  function getGame(gameKey) {
+    return require('../models/games').findGameByKey(gameKey);
   }
 
   // TODO extract admin tests into another file.
@@ -120,8 +158,7 @@ describe('http resources', function() {
 
       it('creates a game', function() {
         this.timeout(5000); // Hitting a live firebase.
-        uid = 'fake-user-id';
-        return createGame();
+        return createGame('fake-user-id');
       });
 
       it('requires authentication', function() {
@@ -179,15 +216,11 @@ describe('http resources', function() {
       });
 
       it('accepts the inviteCode and responds with the gameKey', function() {
-        this.timeout(5000); // Hitting a live firebase.
+        this.timeout(5000);
 
-        // Create a game and then join it.
-        uid = 'fake-user-id';
-        var gameKey, inviteCode;
-        return createGame()
+        return createGame('fake-user-id')
           .then(([gameKey, inviteCode]) => {
-            uid = 'second-fake-user-id';
-            return joinGame(gameKey, inviteCode);
+            return joinGame('second-fake-user-id', gameKey, inviteCode);
           });
 
       });
@@ -197,11 +230,47 @@ describe('http resources', function() {
       this.timeout(5000);
 
       it('starts', function() {
-        uid = 'fake-user-id';
-        var gameKey, inviteCode;
-        return createGame()
+        return createGame('fake-user-id')
           .then(([gameKey, inviteCode]) => {
-            return startGame(gameKey);
+            return startGame('fake-user-id', gameKey);
+          });
+      });
+
+    });
+
+    describe('/games/:gameKey/round/:roundNumber/submit/:cardKey', function() {
+      this.timeout(10000);
+
+      it('records the card submitted', function() {
+        return createGame('user-1')
+          .then(([gameKey, inviteCode]) => joinGame('user-2', gameKey, inviteCode))
+          .then((gameKey) => startGame('user-1', gameKey))
+          .then((gameKey) => getGame(gameKey))
+          .then((game) => {
+            const cardKey = game.hands['user-2'][0].cardKey;
+            return submitCard('user-2', game.gameKey, game.currentRound, cardKey);
+          });
+      });
+    });
+
+    describe.only('/games/:gameKey/judge', function() {
+      this.timeout(10000);
+
+      it('changes the round\'s state', function() {
+        return createGame('user-1')
+          .then(([gameKey, inviteCode]) => joinGame('user-2', gameKey, inviteCode))
+          .then((gameKey) => startGame('user-1', gameKey))
+          .then((gameKey) => getGame(gameKey))
+          .then((game) => {
+            const cardKey = game.hands['user-2'][0].cardKey;
+            return submitCard('user-2', game.gameKey, game.currentRound, cardKey);
+          })
+          .then((resBody) => {
+            return judgeRound('user-1', resBody.gameKey, resBody.roundNumber);
+          })
+          .then((resBody) => getGame(resBody.gameKey))
+          .then((game) => {
+            expect(game.rounds[1].state).to.eq('JUDGING');
           });
       });
 
