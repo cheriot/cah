@@ -137,6 +137,19 @@ describe('http resources', function() {
       });
   }
 
+  function completeRound(playerUid, gameKey, roundNumber, cardKey) {
+    uid = playerUid;
+    console.error('complete round', gameKey, roundNumber, cardKey);
+    return chai.request(app)
+      .patch('/api/v1/games/'+gameKey+'/rounds/'+roundNumber+'/winner/'+cardKey)
+      .set('Authorization', 'fake-token')
+      .then(expect200)
+      .then((res) => {
+        expect(res.body.success).to.eq(true);
+        return res.body;
+      });
+  }
+
   function getGame(gameKey) {
     return require('../models/games').findGameByKey(gameKey);
   }
@@ -253,7 +266,7 @@ describe('http resources', function() {
       });
     });
 
-    describe.only('/games/:gameKey/judge', function() {
+    describe('/games/:gameKey/rounds/:roundNumber/judge', function() {
       this.timeout(10000);
 
       it('changes the round\'s state', function() {
@@ -274,6 +287,35 @@ describe('http resources', function() {
           });
       });
 
+    });
+
+    describe('/games/:gameKey/rounds/:roundNumber/winner', function() {
+      this.timeout(10000);
+
+      it('completes the round', function() {
+        let cardKey;
+        return createGame('user-1')
+          .then(([gameKey, inviteCode]) => joinGame('user-2', gameKey, inviteCode))
+          .then((gameKey) => startGame('user-1', gameKey))
+          .then((gameKey) => getGame(gameKey))
+          .then((game) => {
+            cardKey = game.hands['user-2'][0].cardKey;
+            return submitCard('user-2', game.gameKey, game.currentRound, cardKey);
+          })
+          .then((resBody) => {
+            return judgeRound('user-1', resBody.gameKey, resBody.roundNumber);
+          })
+          .then((resBody) => {
+            return completeRound('user-1', resBody.gameKey, resBody.roundNumber, cardKey);
+          })
+          .then((resBody) => getGame(resBody.gameKey))
+          .then((game) => {
+            expect(game.rounds[1].state).to.eq('COMPLETE');
+            expect(game.currentRound).to.eq(2);
+            expect(_.values(game.hands['user-2']).length).to.eq(7);
+            expect(game.rounds['2'].state).to.eq('SUBMITTING');
+          });
+      });
     });
 
   });

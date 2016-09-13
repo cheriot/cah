@@ -20,7 +20,6 @@ function requireBody(req, field) {
 
 function jsonResult(res, errHttpCode) {
   return (result) => {
-    console.error('jsonResult', result);
     if(result.error) {
       res.status(errHttpCode || 500).json(result);
     } else {
@@ -71,12 +70,23 @@ router.route('/games/:gameKey/rounds/:roundNumber/submit/:cardKey')
 
 router.route('/games/:gameKey/rounds/:roundNumber/judge')
   .patch(function(req, res) {
-    console.error('judge params', req.params);
     games
       .judgeRound(
         res.locals.currentUser,
         req.params.gameKey,
         req.params.roundNumber
+      )
+      .then(jsonResult(res));
+  });
+
+router.route('/games/:gameKey/rounds/:roundNumber/winner/:cardKey')
+  .patch(function(req, res) {
+    games
+      .completeRound(
+        res.locals.currentUser,
+        req.params.gameKey,
+        req.params.roundNumber,
+        req.params.cardKey
       )
       .then(jsonResult(res));
   });

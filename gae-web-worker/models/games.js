@@ -109,7 +109,7 @@ function findGameByKey(gameKey) {
       return game;
     });
 }
-// Expose this method to verify test expectations.
+// Expose this method for test expectations.
 module.exports.findGameByKey = findGameByKey;
 
 function findGameByCode(inviteCode) {
@@ -133,6 +133,7 @@ function findGameByCode(inviteCode) {
 }
 
 function chooseJudge(game) {
+  // TODO
   return Promise.resolve(game.createdBy);
 }
 
@@ -171,11 +172,14 @@ function requireCard(hand, cardKey) {
   return card;
 }
 
-function requireRound(game, roundNumber) {
+function requireRound(game, roundNumber, expectedState) {
   if(game.currentRound != roundNumber)
     throw new Error('Round '+roundNumber+' is no longer current. Try '+game.currentRound+'.');
   const round = game.rounds[roundNumber];
-  if(!round) throw new Error('Unable to find round '+roundNumber);
+  if(!round)
+    throw new Error('Unable to find round '+roundNumber);
+  if(round.state !== expectedState)
+    throw new Error('Expected '+expectedState+', but found'+round.state);
   return round;
 }
 
@@ -185,8 +189,46 @@ function requireJudge(game, roundNumber, currentUser) {
     throw new Error('Invalid roundNumber '+roundNumber);
   if(round.judgeUid != currentUser.uid)
     throw new Error('Only the judge can commence judging.');
-  if(round.state != 'SUBMITTING')
-    throw new Error('Round is not ready for judging.');
+}
+
+function requireCardPlayed(round, cardKey) {
+  const [playerUid, card] = _.toPairs(round.cardsPlayed).find(([k, v]) => {
+    return v.cardKey == cardKey;
+  });
+  if(!card) throw new Error('Unable to find card '+cardKey);
+  return [playerUid, card];
+}
+
+module.exports.completeRound = (currentUser, gameKey, roundNumber, cardKey) => {
+  return findGameByKey(gameKey)
+    .then((game) => {
+
+      // record the winner and complete the current round
+      requireJudge(game, roundNumber, currentUser);
+      const round = requireRound(game, roundNumber, 'JUDGING');
+      const [winnerUid, card] = requireCardPlayed(round, cardKey);
+      round.winnerUid = winnerUid;
+      round.winnerCardKey = card;
+      round.state = 'COMPLETE';
+
+      const nextRoundNumber = round.number+1;
+      return roundValue(game, nextRoundNumber)
+        .then((nextRound) => {
+          // Create the next round (and persist changes to the current round).
+          game.rounds[nextRoundNumber] = nextRound
+          return gameRef(gameKey).child('rounds').set(game.rounds);
+        })
+        .then(() => {
+          // TODO deal more cards
+          // Make the new round current.
+          return gameRef(gameKey)
+            .child('currentRound')
+            .set(nextRoundNumber);
+        });
+    })
+    .then(() => {
+      return {gameKey: gameKey, roundNumber: roundNumber, success: true};
+    })
 }
 
 module.exports.judgeRound = (currentUser, gameKey, roundNumber) => {
@@ -194,7 +236,7 @@ module.exports.judgeRound = (currentUser, gameKey, roundNumber) => {
   return findGameByKey(gameKey)
     .then((game) => {
       requireJudge(game, roundNumber, currentUser);
-      requireRound(game, roundNumber);
+      requireRound(game, roundNumber, 'SUBMITTING');
       return roundRef(gameKey, roundNumber)
         .child('state')
         .set('JUDGING');
@@ -202,7 +244,6 @@ module.exports.judgeRound = (currentUser, gameKey, roundNumber) => {
     .then(() => {
       return {gameKey: gameKey, roundNumber: roundNumber, success: true};
     })
-    .catch((err) => {throw err});
 }
 
 module.exports.submitCard = (currentUser, gameKey, roundNumber, cardKey) => {
@@ -210,7 +251,7 @@ module.exports.submitCard = (currentUser, gameKey, roundNumber, cardKey) => {
     .then((game) => {
       const hand = game.hands[currentUser.uid];
       const card = requireCard(hand, cardKey);
-      const round = requireRound(game, roundNumber);
+      const round = requireRound(game, roundNumber, 'SUBMITTING');
       return roundRef(gameKey, roundNumber)
         .child('cardsPlayed')
         .child(currentUser.uid)
@@ -267,9 +308,7 @@ module.exports.start = (currentUser, gameKey) => {
           // Set up the round.
           return roundValue(game, roundNumber)
             .then((round) => {
-              return gameRef(gameKey)
-                .child('rounds/'+roundNumber)
-                .set(round);
+              return roundRef(gameKey, roundNumber).set(round);
             });
         })
         .then(() => {
