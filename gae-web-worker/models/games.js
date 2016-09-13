@@ -211,6 +211,8 @@ module.exports.completeRound = (currentUser, gameKey, roundNumber, cardKey) => {
       round.winnerCardKey = card;
       round.state = 'COMPLETE';
 
+      // TODO does this end the game? Check once there's a scoreboard.
+
       const nextRoundNumber = round.number+1;
       return roundValue(game, nextRoundNumber)
         .then((nextRound) => {
